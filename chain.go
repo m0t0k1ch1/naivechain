@@ -1,11 +1,7 @@
 package main
 
 import (
-	"encoding/json"
 	"errors"
-	"fmt"
-	"log"
-	"net/http"
 	"sync"
 )
 
@@ -44,7 +40,6 @@ func (bc *Blockchain) getLatestBlock() *Block {
 
 func isValidBlock(block, previousBlock *Block) (bool, error) {
 	if block.Index != previousBlock.Index+1 {
-		log.Println("invalid index")
 		return false, nil
 	}
 
@@ -53,20 +48,8 @@ func isValidBlock(block, previousBlock *Block) (bool, error) {
 		return false, err
 	}
 	if block.PreviousHash != previousBlockHash {
-		log.Println("invalid previous block hash")
 		return false, nil
 	}
 
 	return true, nil
-}
-
-func blocksHandler(w http.ResponseWriter, r *http.Request) {
-	b, err := json.Marshal(blockchain)
-	if err != nil {
-		log.Println(err)
-		fmt.Fprintf(w, "failed to decode blockchain")
-		return
-	}
-
-	w.Write(b)
 }
