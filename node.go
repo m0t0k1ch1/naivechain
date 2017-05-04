@@ -11,15 +11,25 @@ import (
 	"syscall"
 )
 
+type ErrorResponse struct {
+	Error string `json:"error"`
+}
+
 type Node struct {
 	*http.ServeMux
 	config Config
+	logger *log.Logger
 }
 
 func newNode(config Config) *Node {
 	node := &Node{
 		ServeMux: http.NewServeMux(),
 		config:   config,
+		logger: log.New(
+			os.Stdout,
+			"node: ",
+			log.Ldate|log.Ltime,
+		),
 	}
 	node.HandleFunc("/blocks", node.blocksHandler)
 	node.HandleFunc("/mineBlock", node.mineBlockHandler)
@@ -49,15 +59,36 @@ func (node *Node) run() {
 	}
 }
 
+func (node *Node) logError(err error) {
+	node.logger.Println("[ERROR]", err)
+}
+
+func (node *Node) writeResponse(w http.ResponseWriter, b []byte) {
+	w.Header().Set("Content-Type", "application/json")
+	w.Write(b)
+}
+
+func (node *Node) error(w http.ResponseWriter, err error, message string) {
+	node.logError(err)
+
+	b, err := json.Marshal(&ErrorResponse{
+		Error: message,
+	})
+	if err != nil {
+		node.logError(err)
+	}
+
+	node.writeResponse(w, b)
+}
+
 func (node *Node) blocksHandler(w http.ResponseWriter, r *http.Request) {
 	b, err := json.Marshal(blockchain)
 	if err != nil {
-		log.Println(err)
-		fmt.Fprintf(w, "failed to decode blockchain")
+		node.error(w, err, "failed to decode blockchain")
 		return
 	}
 
-	w.Write(b)
+	node.writeResponse(w, b)
 }
 
 func (node *Node) mineBlockHandler(w http.ResponseWriter, r *http.Request) {
@@ -66,21 +97,18 @@ func (node *Node) mineBlockHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if err := json.NewDecoder(r.Body).Decode(&params); err != nil {
-		log.Println(err)
-		fmt.Fprintf(w, "failed to decode data")
+		node.error(w, err, "failed to decode data")
 		return
 	}
 
 	block, err := generateBlock(params.Data)
 	if err != nil {
-		log.Println(err)
-		fmt.Fprintf(w, "failed to generate block")
+		node.error(w, err, "failed to generate block")
 		return
 	}
 
 	if err := blockchain.addBlock(block); err != nil {
-		log.Println(err)
-		fmt.Fprintf(w, "failed to add block")
+		node.error(w, err, "failed to add block")
 		return
 	}
 
