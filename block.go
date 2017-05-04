@@ -22,7 +22,7 @@ type Block struct {
 	Data         string `json:"data"`
 }
 
-func NewBlockFromBytes(b []byte) (*Block, error) {
+func newBlockFromBytes(b []byte) (*Block, error) {
 	var index int64
 	if err := binary.Read(bytes.NewReader(b[:8]), binary.LittleEndian, &index); err != nil {
 		return nil, err
@@ -41,7 +41,7 @@ func NewBlockFromBytes(b []byte) (*Block, error) {
 	}, nil
 }
 
-func (block *Block) Bytes() ([]byte, error) {
+func (block *Block) bytes() ([]byte, error) {
 	buf := &bytes.Buffer{}
 
 	if err := binary.Write(buf, binary.LittleEndian, block.Index); err != nil {
@@ -67,8 +67,8 @@ func (block *Block) Bytes() ([]byte, error) {
 	return buf.Bytes(), nil
 }
 
-func (block *Block) Hex() (string, error) {
-	b, err := block.Bytes()
+func (block *Block) hex() (string, error) {
+	b, err := block.bytes()
 	if err != nil {
 		return "", err
 	}
@@ -76,8 +76,8 @@ func (block *Block) Hex() (string, error) {
 	return hex.EncodeToString(b), nil
 }
 
-func (block *Block) Hash() (string, error) {
-	b, err := block.Bytes()
+func (block *Block) hash() (string, error) {
+	b, err := block.bytes()
 	if err != nil {
 		return "", err
 	}

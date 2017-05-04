@@ -15,7 +15,7 @@ func TestNewBlockFromBytes(t *testing.T) {
 		t.Fatalf("should not be fail: %v", err)
 	}
 
-	block, err := NewBlockFromBytes(blockBytes)
+	block, err := newBlockFromBytes(blockBytes)
 	if err != nil {
 		t.Fatalf("should not be fail: %v", err)
 	}
@@ -34,7 +34,7 @@ func TestNewBlockFromBytes(t *testing.T) {
 }
 
 func TestBlockHex(t *testing.T) {
-	blockHex, err := genesisBlock.Hex()
+	blockHex, err := genesisBlock.hex()
 	if err != nil {
 		t.Fatalf("should not be fail: %v", err)
 	}
