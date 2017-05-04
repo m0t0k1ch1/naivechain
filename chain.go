@@ -34,7 +34,7 @@ func blocksHandler(w http.ResponseWriter, r *http.Request) {
 	b, err := json.Marshal(blockchain)
 	if err != nil {
 		log.Println(err)
-		fmt.Fprintf(w, "failed to marshal blockchain")
+		fmt.Fprintf(w, "failed to decode blockchain")
 		return
 	}
 
