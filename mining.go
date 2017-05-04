@@ -2,6 +2,8 @@ package main
 
 import (
 	"encoding/json"
+	"fmt"
+	"log"
 	"net/http"
 	"time"
 )
@@ -12,13 +14,15 @@ func mineBlockHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if err := json.NewDecoder(r.Body).Decode(&params); err != nil {
-		// TODO: output error log
+		log.Println(err)
+		fmt.Fprintf(w, "failed to decode data")
 		return
 	}
 
 	block, err := generateBlock(params.Data)
 	if err != nil {
-		// TODO: output error log
+		log.Println(err)
+		fmt.Fprintf(w, "failed to generate block")
 		return
 	}
 
