@@ -3,6 +3,7 @@ package main
 import (
 	"errors"
 	"sync"
+	"time"
 )
 
 type Blockchain []*Block
@@ -36,6 +37,21 @@ func (bc *Blockchain) getLatestBlock() *Block {
 	defer mu.RUnlock()
 
 	return blockchain[len(blockchain)-1]
+}
+
+func generateBlock(data string) (*Block, error) {
+	previousBlock := blockchain.getLatestBlock()
+	previousBlockHash, err := previousBlock.hash()
+	if err != nil {
+		return nil, err
+	}
+
+	return &Block{
+		Index:        previousBlock.Index + 1,
+		PreviousHash: previousBlockHash,
+		Timestamp:    time.Now().Unix(),
+		Data:         data,
+	}, nil
 }
 
 func isValidBlock(block, previousBlock *Block) (bool, error) {

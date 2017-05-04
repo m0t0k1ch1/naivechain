@@ -6,7 +6,6 @@ import (
 	"encoding/binary"
 	"encoding/hex"
 	"fmt"
-	"time"
 )
 
 var genesisBlock = &Block{
@@ -84,19 +83,4 @@ func (block *Block) hash() (string, error) {
 	}
 
 	return fmt.Sprintf("%x", sha256.Sum256(b)), nil
-}
-
-func generateBlock(data string) (*Block, error) {
-	previousBlock := blockchain.getLatestBlock()
-	previousBlockHash, err := previousBlock.hash()
-	if err != nil {
-		return nil, err
-	}
-
-	return &Block{
-		Index:        previousBlock.Index + 1,
-		PreviousHash: previousBlockHash,
-		Timestamp:    time.Now().Unix(),
-		Data:         data,
-	}, nil
 }
