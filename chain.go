@@ -40,30 +40,30 @@ func (bc *Blockchain) getLatestBlock() *Block {
 }
 
 func generateBlock(data string) (*Block, error) {
-	previousBlock := blockchain.getLatestBlock()
-	previousBlockHash, err := previousBlock.hash()
+	prevBlock := blockchain.getLatestBlock()
+	prevBlockHash, err := prevBlock.hash()
 	if err != nil {
 		return nil, err
 	}
 
 	return &Block{
-		Index:        previousBlock.Index + 1,
-		PreviousHash: previousBlockHash,
+		Index:        prevBlock.Index + 1,
+		PreviousHash: prevBlockHash,
 		Timestamp:    time.Now().Unix(),
 		Data:         data,
 	}, nil
 }
 
-func isValidBlock(block, previousBlock *Block) (bool, error) {
-	if block.Index != previousBlock.Index+1 {
+func isValidBlock(block, prevBlock *Block) (bool, error) {
+	if block.Index != prevBlock.Index+1 {
 		return false, nil
 	}
 
-	previousBlockHash, err := previousBlock.hash()
+	prevBlockHash, err := prevBlock.hash()
 	if err != nil {
 		return false, err
 	}
-	if block.PreviousHash != previousBlockHash {
+	if block.PreviousHash != prevBlockHash {
 		return false, nil
 	}
 

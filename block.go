@@ -48,11 +48,11 @@ func (block *Block) bytes() ([]byte, error) {
 		return nil, err
 	}
 
-	previousHashBytes, err := hex.DecodeString(block.PreviousHash)
+	prevHashBytes, err := hex.DecodeString(block.PreviousHash)
 	if err != nil {
 		return nil, err
 	}
-	if _, err := buf.Write(previousHashBytes); err != nil {
+	if _, err := buf.Write(prevHashBytes); err != nil {
 		return nil, err
 	}
 
