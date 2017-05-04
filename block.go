@@ -8,7 +8,7 @@ import (
 	"fmt"
 )
 
-var GenesisBlock = &Block{
+var genesisBlock = &Block{
 	Index:        0,
 	PreviousHash: "0000000000000000000000000000000000000000000000000000000000000000",
 	Timestamp:    1465154705,
