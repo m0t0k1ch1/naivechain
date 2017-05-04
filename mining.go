@@ -26,7 +26,11 @@ func mineBlockHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	blockchain.addBlock(block)
+	if err := blockchain.addBlock(block); err != nil {
+		log.Println(err)
+		fmt.Fprintf(w, "failed to add block")
+		return
+	}
 
 	// TODO: bloadcast
 }
