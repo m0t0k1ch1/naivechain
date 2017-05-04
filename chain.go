@@ -1,6 +1,12 @@
 package main
 
-import "sync"
+import (
+	"encoding/json"
+	"fmt"
+	"log"
+	"net/http"
+	"sync"
+)
 
 type Blockchain []*Block
 
@@ -22,4 +28,15 @@ func (bc *Blockchain) getLatestBlock() *Block {
 	defer mu.RUnlock()
 
 	return blockchain[len(blockchain)-1]
+}
+
+func blocksHandler(w http.ResponseWriter, r *http.Request) {
+	b, err := json.Marshal(blockchain)
+	if err != nil {
+		log.Println(err)
+		fmt.Fprintf(w, "failed to marshal blockchain")
+		return
+	}
+
+	w.Write(b)
 }
