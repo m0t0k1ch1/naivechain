@@ -16,7 +16,7 @@ type Blockchain struct {
 	mu     sync.RWMutex
 }
 
-func NewBlockchain() *Blockchain {
+func newBlockchain() *Blockchain {
 	return &Blockchain{
 		blocks: []*Block{genesisBlock},
 		mu:     sync.RWMutex{},

@@ -25,7 +25,7 @@ type Node struct {
 func newNode(config Config) *Node {
 	node := &Node{
 		ServeMux:   http.NewServeMux(),
-		blockchain: NewBlockchain(),
+		blockchain: newBlockchain(),
 		config:     config,
 		logger: log.New(
 			os.Stdout,

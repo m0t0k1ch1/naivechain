@@ -7,9 +7,7 @@ var (
 )
 
 func TestMineBlock(t *testing.T) {
-	bc := &Blockchain{
-		blocks: []*Block{genesisBlock},
-	}
+	bc := newBlockchain()
 
 	block, err := bc.generateBlock("white noise")
 	if err != nil {
@@ -50,19 +48,16 @@ func TestMineBlock(t *testing.T) {
 }
 
 func TestReplaceChain(t *testing.T) {
-	bc := &Blockchain{
-		blocks: []*Block{genesisBlock},
-	}
-	bcNew := &Blockchain{
-		blocks: []*Block{
-			genesisBlock,
-			&Block{
-				Index:        1,
-				PreviousHash: genesisBlockHash,
-				Timestamp:    1494093545,
-				Data:         "white noise",
-			},
-		},
+	bc := newBlockchain()
+
+	bcNew := newBlockchain()
+	if err := bcNew.addBlock(&Block{
+		Index:        1,
+		PreviousHash: "17aacbe244debc3869a4f604c8136da450283cba3e0467681f398af16871cc3f",
+		Timestamp:    1494093545,
+		Data:         "white noise",
+	}); err != nil {
+		t.Fatalf("should not be fail: %v", err)
 	}
 
 	ok, err := bc.tryReplaceBlocks(bcNew)
