@@ -17,14 +17,16 @@ type ErrorResponse struct {
 
 type Node struct {
 	*http.ServeMux
-	config Config
-	logger *log.Logger
+	blockchain *Blockchain
+	config     Config
+	logger     *log.Logger
 }
 
 func newNode(config Config) *Node {
 	node := &Node{
-		ServeMux: http.NewServeMux(),
-		config:   config,
+		ServeMux:   http.NewServeMux(),
+		blockchain: NewBlockchain(),
+		config:     config,
 		logger: log.New(
 			os.Stdout,
 			"node: ",
@@ -82,9 +84,9 @@ func (node *Node) error(w http.ResponseWriter, err error, message string) {
 }
 
 func (node *Node) blocksHandler(w http.ResponseWriter, r *http.Request) {
-	b, err := json.Marshal(blockchain)
+	b, err := json.Marshal(node.blockchain.blocks)
 	if err != nil {
-		node.error(w, err, "failed to decode blockchain")
+		node.error(w, err, "failed to decode blocks")
 		return
 	}
 
@@ -101,16 +103,16 @@ func (node *Node) mineBlockHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	block, err := blockchain.generateBlock(params.Data)
+	block, err := node.blockchain.generateBlock(params.Data)
 	if err != nil {
 		node.error(w, err, "failed to generate block")
 		return
 	}
 
-	if err := blockchain.addBlock(block); err != nil {
+	if err := node.blockchain.addBlock(block); err != nil {
 		node.error(w, err, "failed to add block")
 		return
 	}
 
-	// TODO: bloadcast
+	// TODO: broadcast
 }

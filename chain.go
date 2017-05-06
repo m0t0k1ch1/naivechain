@@ -6,41 +6,44 @@ import (
 	"time"
 )
 
-type Blockchain []*Block
-
 var (
-	mu         = sync.RWMutex{}
-	blockchain = Blockchain{genesisBlock}
-
+	ErrInvalidChain = errors.New("invalid chain")
 	ErrInvalidBlock = errors.New("invalid block")
 )
 
-func (bc *Blockchain) addBlock(block *Block) error {
-	ok, err := isValidBlock(block, blockchain.getLatestBlock())
-	if err != nil {
-		return err
+type Blockchain struct {
+	blocks []*Block
+	mu     sync.RWMutex
+}
+
+func NewBlockchain() *Blockchain {
+	return &Blockchain{
+		blocks: []*Block{genesisBlock},
+		mu:     sync.RWMutex{},
 	}
-	if !ok {
-		return ErrInvalidBlock
-	}
+}
 
-	mu.Lock()
-	defer mu.Unlock()
+func (bc *Blockchain) len() int {
+	return len(bc.blocks)
+}
 
-	blockchain = append(blockchain, block)
-
-	return nil
+func (bc *Blockchain) getGenesisBlock() *Block {
+	return bc.blocks[0]
 }
 
 func (bc *Blockchain) getLatestBlock() *Block {
-	mu.RLock()
-	defer mu.RUnlock()
+	bc.mu.RLock()
+	defer bc.mu.RUnlock()
 
-	return blockchain[len(blockchain)-1]
+	return bc.getBlock(bc.len() - 1)
+}
+
+func (bc *Blockchain) getBlock(index int) *Block {
+	return bc.blocks[index]
 }
 
 func (bc *Blockchain) generateBlock(data string) (*Block, error) {
-	prevBlock := blockchain.getLatestBlock()
+	prevBlock := bc.getLatestBlock()
 	prevBlockHash, err := prevBlock.hash()
 	if err != nil {
 		return nil, err
@@ -54,17 +57,85 @@ func (bc *Blockchain) generateBlock(data string) (*Block, error) {
 	}, nil
 }
 
-func isValidBlock(block, prevBlock *Block) (bool, error) {
-	if block.Index != prevBlock.Index+1 {
+func (bc *Blockchain) addBlock(block *Block) error {
+	ok, err := isValidBlock(block, bc.getLatestBlock())
+	if err != nil {
+		return err
+	}
+	if !ok {
+		return ErrInvalidBlock
+	}
+
+	bc.mu.Lock()
+	defer bc.mu.Unlock()
+
+	bc.blocks = append(bc.blocks, block)
+
+	return nil
+}
+
+func (bc *Blockchain) tryReplaceBlocks(bcNew *Blockchain) (bool, error) {
+	if bcNew.len() <= bc.len() {
 		return false, nil
 	}
 
-	prevBlockHash, err := prevBlock.hash()
+	ok, err := bcNew.isValid()
 	if err != nil {
 		return false, err
 	}
-	if block.PreviousHash != prevBlockHash {
+	if !ok {
 		return false, nil
+	}
+
+	bc.blocks = bcNew.blocks
+
+	return true, nil
+}
+
+func (bc *Blockchain) isValidGenesisBlock() (bool, error) {
+	genesisBlockHash, err := genesisBlock.hash()
+	if err != nil {
+		return false, err
+	}
+
+	firstBlock := bc.getGenesisBlock()
+	firstBlockHash, err := firstBlock.hash()
+	if err != nil {
+		return false, err
+	}
+	if firstBlockHash != genesisBlockHash {
+		return false, nil
+	}
+
+	return true, nil
+}
+
+func (bc *Blockchain) isValid() (bool, error) {
+	if bc.len() == 0 {
+		return false, nil
+	}
+
+	ok, err := bc.isValidGenesisBlock()
+	if err != nil {
+		return false, err
+	}
+	if !ok {
+		return false, nil
+	}
+
+	prevBlock := bc.getGenesisBlock()
+	for i := 1; i < bc.len(); i++ {
+		block := bc.getBlock(i)
+
+		ok, err := isValidBlock(block, prevBlock)
+		if err != nil {
+			return false, err
+		}
+		if !ok {
+			return false, nil
+		}
+
+		prevBlock = block
 	}
 
 	return true, nil

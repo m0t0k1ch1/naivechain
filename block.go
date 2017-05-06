@@ -84,3 +84,19 @@ func (block *Block) hash() (string, error) {
 
 	return fmt.Sprintf("%x", sha256.Sum256(b)), nil
 }
+
+func isValidBlock(block, prevBlock *Block) (bool, error) {
+	if block.Index != prevBlock.Index+1 {
+		return false, nil
+	}
+
+	prevBlockHash, err := prevBlock.hash()
+	if err != nil {
+		return false, err
+	}
+	if block.PreviousHash != prevBlockHash {
+		return false, nil
+	}
+
+	return true, nil
+}
