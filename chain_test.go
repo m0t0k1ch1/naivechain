@@ -2,10 +2,6 @@ package main
 
 import "testing"
 
-var (
-	genesisBlockHash = "17aacbe244debc3869a4f604c8136da450283cba3e0467681f398af16871cc3f"
-)
-
 func TestMineBlock(t *testing.T) {
 	bc := newBlockchain()
 
