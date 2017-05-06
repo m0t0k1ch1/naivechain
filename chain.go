@@ -1,14 +1,8 @@
 package main
 
 import (
-	"errors"
 	"sync"
 	"time"
-)
-
-var (
-	ErrInvalidChain = errors.New("invalid chain")
-	ErrInvalidBlock = errors.New("invalid block")
 )
 
 type Blockchain struct {

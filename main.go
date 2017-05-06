@@ -2,6 +2,7 @@ package main
 
 import (
 	"encoding/json"
+	"errors"
 	"flag"
 	"log"
 	"os"
@@ -9,6 +10,11 @@ import (
 
 const (
 	DefaultConfigPath = "config.json"
+)
+
+var (
+	ErrInvalidChain = errors.New("invalid chain")
+	ErrInvalidBlock = errors.New("invalid block")
 )
 
 func main() {
