@@ -39,7 +39,7 @@ func (bc *Blockchain) getLatestBlock() *Block {
 	return blockchain[len(blockchain)-1]
 }
 
-func generateBlock(data string) (*Block, error) {
+func (bc *Blockchain) generateBlock(data string) (*Block, error) {
 	prevBlock := blockchain.getLatestBlock()
 	prevBlockHash, err := prevBlock.hash()
 	if err != nil {

@@ -101,7 +101,7 @@ func (node *Node) mineBlockHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	block, err := generateBlock(params.Data)
+	block, err := blockchain.generateBlock(params.Data)
 	if err != nil {
 		node.error(w, err, "failed to generate block")
 		return
