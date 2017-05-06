@@ -43,7 +43,7 @@ func TestMineBlock(t *testing.T) {
 	}
 }
 
-func TestReplaceChain(t *testing.T) {
+func TestReplaceBlocks(t *testing.T) {
 	bc := newBlockchain()
 
 	bcNew := newBlockchain()
