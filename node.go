@@ -3,7 +3,6 @@ package main
 import (
 	"context"
 	"encoding/json"
-	"fmt"
 	"log"
 	"net/http"
 	"os"
@@ -23,24 +22,20 @@ type Node struct {
 	blockchain *Blockchain
 	sockets    []*websocket.Conn
 	mu         sync.RWMutex
-	config     Config
 	logger     *log.Logger
 }
 
-func newNode(config Config) *Node {
-	node := &Node{
+func newNode() *Node {
+	return &Node{
 		blockchain: newBlockchain(),
 		sockets:    []*websocket.Conn{},
 		mu:         sync.RWMutex{},
-		config:     config,
 		logger: log.New(
 			os.Stdout,
 			"node: ",
 			log.Ldate|log.Ltime,
 		),
 	}
-
-	return node
 }
 
 func (node *Node) newApiServer() *http.Server {
@@ -52,7 +47,7 @@ func (node *Node) newApiServer() *http.Server {
 
 	return &http.Server{
 		Handler: mux,
-		Addr:    fmt.Sprintf(":%d", node.config.Api.Port),
+		Addr:    *apiAddr,
 	}
 }
 
@@ -62,7 +57,7 @@ func (node *Node) newP2PServer() *http.Server {
 			node.addSocket(ws)
 			node.p2pHandler(ws)
 		}),
-		Addr: fmt.Sprintf(":%d", node.config.P2P.Port),
+		Addr: *p2pAddr,
 	}
 }
 

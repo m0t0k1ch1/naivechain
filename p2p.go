@@ -15,7 +15,7 @@ func (node *Node) addSocket(ws *websocket.Conn) {
 
 func (node *Node) connectToPeers(peers []string) {
 	for _, peer := range peers {
-		ws, err := websocket.Dial(peer, "", node.config.P2P.Origin)
+		ws, err := websocket.Dial(peer, "", *p2pOrigin)
 		if err != nil {
 			node.logError(err)
 			continue
