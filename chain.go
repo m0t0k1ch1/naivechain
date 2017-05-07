@@ -52,6 +52,9 @@ func (bc *Blockchain) generateBlock(data string) (*Block, error) {
 }
 
 func (bc *Blockchain) addBlock(block *Block) error {
+	bc.mu.Lock()
+	defer bc.mu.Unlock()
+
 	ok, err := isValidBlock(block, bc.getLatestBlock())
 	if err != nil {
 		return err
@@ -60,15 +63,15 @@ func (bc *Blockchain) addBlock(block *Block) error {
 		return ErrInvalidBlock
 	}
 
-	bc.mu.Lock()
-	defer bc.mu.Unlock()
-
 	bc.blocks = append(bc.blocks, block)
 
 	return nil
 }
 
 func (bc *Blockchain) tryReplaceBlocks(bcNew *Blockchain) (bool, error) {
+	bc.mu.Lock()
+	defer bc.mu.Unlock()
+
 	if bcNew.len() <= bc.len() {
 		return false, nil
 	}
@@ -80,9 +83,6 @@ func (bc *Blockchain) tryReplaceBlocks(bcNew *Blockchain) (bool, error) {
 	if !ok {
 		return false, nil
 	}
-
-	bc.mu.Lock()
-	defer bc.mu.Unlock()
 
 	bc.blocks = bcNew.blocks
 
@@ -108,6 +108,9 @@ func (bc *Blockchain) isValidGenesisBlock() (bool, error) {
 }
 
 func (bc *Blockchain) isValid() (bool, error) {
+	bc.mu.RLock()
+	defer bc.mu.RUnlock()
+
 	if bc.len() == 0 {
 		return false, nil
 	}
