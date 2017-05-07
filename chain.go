@@ -22,7 +22,7 @@ func (bc *Blockchain) len() int {
 }
 
 func (bc *Blockchain) getGenesisBlock() *Block {
-	return bc.blocks[0]
+	return bc.getBlock(0)
 }
 
 func (bc *Blockchain) getLatestBlock() *Block {
