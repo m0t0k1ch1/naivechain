@@ -1,9 +1,19 @@
 package main
 
-import "testing"
+import (
+	"sync"
+	"testing"
+)
 
-func TestMineBlock(t *testing.T) {
-	bc := newBlockchain()
+func newTestBlockchain(blocks []*Block) *Blockchain {
+	return &Blockchain{
+		blocks: blocks,
+		mu:     sync.RWMutex{},
+	}
+}
+
+func TestGenerateBlock(t *testing.T) {
+	bc := newTestBlockchain([]*Block{genesisBlock})
 
 	block, err := bc.generateBlock("white noise")
 	if err != nil {
@@ -21,6 +31,16 @@ func TestMineBlock(t *testing.T) {
 	}
 	if block.PreviousHash != prevBlockHash {
 		t.Errorf("want %q but %q", prevBlockHash, block.PreviousHash)
+	}
+}
+
+func TestAddBlock(t *testing.T) {
+	bc := newTestBlockchain([]*Block{genesisBlock})
+	block := &Block{
+		Index:        1,
+		PreviousHash: "17aacbe244debc3869a4f604c8136da450283cba3e0467681f398af16871cc3f",
+		Timestamp:    1494093545,
+		Data:         "white noise",
 	}
 
 	if err := bc.addBlock(block); err != nil {
@@ -44,17 +64,16 @@ func TestMineBlock(t *testing.T) {
 }
 
 func TestReplaceBlocks(t *testing.T) {
-	bc := newBlockchain()
-
-	bcNew := newBlockchain()
-	if err := bcNew.addBlock(&Block{
-		Index:        1,
-		PreviousHash: "17aacbe244debc3869a4f604c8136da450283cba3e0467681f398af16871cc3f",
-		Timestamp:    1494093545,
-		Data:         "white noise",
-	}); err != nil {
-		t.Fatalf("should not be fail: %v", err)
-	}
+	bc := newTestBlockchain([]*Block{genesisBlock})
+	bcNew := newTestBlockchain([]*Block{
+		genesisBlock,
+		&Block{
+			Index:        1,
+			PreviousHash: "17aacbe244debc3869a4f604c8136da450283cba3e0467681f398af16871cc3f",
+			Timestamp:    1494093545,
+			Data:         "white noise",
+		},
+	})
 
 	if err := bc.replaceBlocks(bcNew); err != nil {
 		t.Fatalf("should not be fail: %v", err)
