@@ -54,12 +54,12 @@ func TestAddBlock(t *testing.T) {
 	if err != nil {
 		t.Fatalf("should not be fail: %v", err)
 	}
-	blockHash, err := block.hash()
+	expectedBlockHash, err := block.hash()
 	if err != nil {
 		t.Fatalf("should not be fail: %v", err)
 	}
-	if latestBlockHash != blockHash {
-		t.Errorf("want %q but %q", blockHash, latestBlockHash)
+	if latestBlockHash != expectedBlockHash {
+		t.Errorf("want %q but %q", expectedBlockHash, latestBlockHash)
 	}
 }
 
@@ -86,11 +86,11 @@ func TestReplaceBlocks(t *testing.T) {
 	if err != nil {
 		t.Fatalf("should not be fail: %v", err)
 	}
-	blockHash, err := bcNew.getBlock(1).hash()
+	expectedBlockHash, err := bcNew.getLatestBlock().hash()
 	if err != nil {
 		t.Fatalf("should not be fail: %v", err)
 	}
-	if latestBlockHash != blockHash {
-		t.Errorf("want %q but %q", blockHash, latestBlockHash)
+	if latestBlockHash != expectedBlockHash {
+		t.Errorf("want %q but %q", expectedBlockHash, latestBlockHash)
 	}
 }
