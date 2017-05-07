@@ -94,3 +94,74 @@ func TestReplaceBlocks(t *testing.T) {
 		t.Errorf("want %q but %q", expectedBlockHash, latestBlockHash)
 	}
 }
+
+type isValidChainTestCase struct {
+	blockchain *Blockchain
+	ok         bool
+}
+
+var isValidChainTestCases = []isValidChainTestCase{
+	isValidChainTestCase{
+		newTestBlockchain([]*Block{}),
+		false,
+	},
+	isValidChainTestCase{
+		newTestBlockchain([]*Block{
+			&Block{
+				Index:        0,
+				PreviousHash: "0000000000000000000000000000000000000000000000000000000000000000",
+				Timestamp:    1465154705,
+				Data:         "bad genesis block!!",
+			},
+		}),
+		false,
+	},
+	isValidChainTestCase{
+		newTestBlockchain([]*Block{
+			genesisBlock,
+			&Block{
+				Index:        2,
+				PreviousHash: "17aacbe244debc3869a4f604c8136da450283cba3e0467681f398af16871cc3f",
+				Timestamp:    1494177351,
+				Data:         "white noise",
+			},
+		}),
+		false,
+	},
+	isValidChainTestCase{
+		newTestBlockchain([]*Block{
+			genesisBlock,
+			&Block{
+				Index:        1,
+				PreviousHash: "27aacbe244debc3869a4f604c8136da450283cba3e0467681f398af16871cc3f",
+				Timestamp:    1494177351,
+				Data:         "white noise",
+			},
+		}),
+		false,
+	},
+	isValidChainTestCase{
+		newTestBlockchain([]*Block{
+			genesisBlock,
+			&Block{
+				Index:        1,
+				PreviousHash: "17aacbe244debc3869a4f604c8136da450283cba3e0467681f398af16871cc3f",
+				Timestamp:    1494177351,
+				Data:         "white noise",
+			},
+		}),
+		true,
+	},
+}
+
+func TestIsValidChain(t *testing.T) {
+	for _, testCase := range isValidChainTestCases {
+		ok, err := testCase.blockchain.isValid()
+		if err != nil {
+			t.Fatalf("should not be fail: %v", err)
+		}
+		if ok != testCase.ok {
+			t.Errorf("want %t but %t", testCase.ok, ok)
+		}
+	}
+}
