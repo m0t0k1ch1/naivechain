@@ -26,13 +26,13 @@ func (bc *Blockchain) getGenesisBlock() *Block {
 }
 
 func (bc *Blockchain) getLatestBlock() *Block {
-	bc.mu.RLock()
-	defer bc.mu.RUnlock()
-
 	return bc.getBlock(bc.len() - 1)
 }
 
 func (bc *Blockchain) getBlock(index int) *Block {
+	bc.mu.RLock()
+	defer bc.mu.RUnlock()
+
 	return bc.blocks[index]
 }
 
@@ -80,6 +80,9 @@ func (bc *Blockchain) tryReplaceBlocks(bcNew *Blockchain) (bool, error) {
 	if !ok {
 		return false, nil
 	}
+
+	bc.mu.Lock()
+	defer bc.mu.Unlock()
 
 	bc.blocks = bcNew.blocks
 
