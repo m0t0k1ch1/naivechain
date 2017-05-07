@@ -55,38 +55,18 @@ func (bc *Blockchain) addBlock(block *Block) error {
 	bc.mu.Lock()
 	defer bc.mu.Unlock()
 
-	ok, err := isValidBlock(block, bc.getLatestBlock())
-	if err != nil {
-		return err
-	}
-	if !ok {
-		return ErrInvalidBlock
-	}
-
 	bc.blocks = append(bc.blocks, block)
 
 	return nil
 }
 
-func (bc *Blockchain) tryReplaceBlocks(bcNew *Blockchain) (bool, error) {
+func (bc *Blockchain) replaceBlocks(bcNew *Blockchain) error {
 	bc.mu.Lock()
 	defer bc.mu.Unlock()
 
-	if bcNew.len() <= bc.len() {
-		return false, nil
-	}
-
-	ok, err := bcNew.isValid()
-	if err != nil {
-		return false, err
-	}
-	if !ok {
-		return false, nil
-	}
-
 	bc.blocks = bcNew.blocks
 
-	return true, nil
+	return nil
 }
 
 func (bc *Blockchain) isValidGenesisBlock() (bool, error) {

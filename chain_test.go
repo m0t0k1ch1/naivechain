@@ -56,12 +56,8 @@ func TestReplaceBlocks(t *testing.T) {
 		t.Fatalf("should not be fail: %v", err)
 	}
 
-	ok, err := bc.tryReplaceBlocks(bcNew)
-	if err != nil {
+	if err := bc.replaceBlocks(bcNew); err != nil {
 		t.Fatalf("should not be fail: %v", err)
-	}
-	if !ok {
-		t.Fatalf("want %t but %t", true, ok)
 	}
 	if bc.len() != 2 {
 		t.Fatalf("want %d but %d", 2, bc.len())
