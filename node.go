@@ -42,7 +42,7 @@ func newNode(config Config) *Node {
 func (node *Node) run() {
 	httpSrv := &http.Server{
 		Handler: node,
-		Addr:    fmt.Sprintf(":%d", node.config.HttpPort),
+		Addr:    fmt.Sprintf(":%d", node.config.Api.Port),
 	}
 
 	go func() {
@@ -99,7 +99,7 @@ func (node *Node) mineBlockHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if err := json.NewDecoder(r.Body).Decode(&params); err != nil {
-		node.error(w, err, "failed to decode data")
+		node.error(w, err, "failed to decode params")
 		return
 	}
 
