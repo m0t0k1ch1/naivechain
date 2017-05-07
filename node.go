@@ -8,7 +8,10 @@ import (
 	"net/http"
 	"os"
 	"os/signal"
+	"sync"
 	"syscall"
+
+	"golang.org/x/net/websocket"
 )
 
 type ErrorResponse struct {
@@ -18,14 +21,17 @@ type ErrorResponse struct {
 type Node struct {
 	*http.ServeMux
 	blockchain *Blockchain
+	sockets    []*websocket.Conn
+	mu         sync.RWMutex
 	config     Config
 	logger     *log.Logger
 }
 
 func newNode(config Config) *Node {
 	node := &Node{
-		ServeMux:   http.NewServeMux(),
 		blockchain: newBlockchain(),
+		sockets:    []*websocket.Conn{},
+		mu:         sync.RWMutex{},
 		config:     config,
 		logger: log.New(
 			os.Stdout,
@@ -33,20 +39,44 @@ func newNode(config Config) *Node {
 			log.Ldate|log.Ltime,
 		),
 	}
-	node.HandleFunc("/blocks", node.blocksHandler)
-	node.HandleFunc("/mineBlock", node.mineBlockHandler)
 
 	return node
 }
 
-func (node *Node) run() {
-	httpSrv := &http.Server{
-		Handler: node,
+func (node *Node) newApiServer() *http.Server {
+	mux := http.NewServeMux()
+	mux.HandleFunc("/blocks", node.blocksHandler)
+	mux.HandleFunc("/mineBlock", node.mineBlockHandler)
+	mux.HandleFunc("/peers", node.peersHandler)
+	mux.HandleFunc("/addPeer", node.addPeerHandler)
+
+	return &http.Server{
+		Handler: mux,
 		Addr:    fmt.Sprintf(":%d", node.config.Api.Port),
 	}
+}
 
+func (node *Node) newP2PServer() *http.Server {
+	return &http.Server{
+		Handler: websocket.Handler(func(ws *websocket.Conn) {
+			node.addSocket(ws)
+			node.p2pHandler(ws)
+		}),
+		Addr: fmt.Sprintf(":%d", node.config.P2P.Port),
+	}
+}
+
+func (node *Node) run() {
+	apiSrv := node.newApiServer()
 	go func() {
-		if err := httpSrv.ListenAndServe(); err != nil {
+		if err := apiSrv.ListenAndServe(); err != nil {
+			log.Fatal(err)
+		}
+	}()
+
+	p2pSrv := node.newP2PServer()
+	go func() {
+		if err := p2pSrv.ListenAndServe(); err != nil {
 			log.Fatal(err)
 		}
 	}()
@@ -56,13 +86,18 @@ func (node *Node) run() {
 	for {
 		s := <-signalCh
 		if s == syscall.SIGTERM {
-			httpSrv.Shutdown(context.Background())
+			apiSrv.Shutdown(context.Background())
+			p2pSrv.Shutdown(context.Background())
 		}
 	}
 }
 
+func (node *Node) log(v ...interface{}) {
+	node.logger.Println(v)
+}
+
 func (node *Node) logError(err error) {
-	node.logger.Println("[ERROR]", err)
+	node.log("[ERROR]", err)
 }
 
 func (node *Node) writeResponse(w http.ResponseWriter, b []byte) {
@@ -79,51 +114,6 @@ func (node *Node) error(w http.ResponseWriter, err error, message string) {
 	if err != nil {
 		node.logError(err)
 	}
-
-	node.writeResponse(w, b)
-}
-
-func (node *Node) blocksHandler(w http.ResponseWriter, r *http.Request) {
-	b, err := json.Marshal(node.blockchain.blocks)
-	if err != nil {
-		node.error(w, err, "failed to decode blocks")
-		return
-	}
-
-	node.writeResponse(w, b)
-}
-
-func (node *Node) mineBlockHandler(w http.ResponseWriter, r *http.Request) {
-	var params struct {
-		Data string `json:"data"`
-	}
-
-	if err := json.NewDecoder(r.Body).Decode(&params); err != nil {
-		node.error(w, err, "failed to decode params")
-		return
-	}
-
-	block, err := node.blockchain.generateBlock(params.Data)
-	if err != nil {
-		node.error(w, err, "failed to generate block")
-		return
-	}
-	blockHash, err := block.hash()
-	if err != nil {
-		node.error(w, err, "failed to hash block")
-		return
-	}
-
-	if err := node.blockchain.addBlock(block); err != nil {
-		node.error(w, err, "failed to add block")
-		return
-	}
-
-	// TODO: broadcast
-
-	b, err := json.Marshal(map[string]string{
-		"hash": blockHash,
-	})
 
 	node.writeResponse(w, b)
 }
