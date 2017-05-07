@@ -38,3 +38,54 @@ func TestBlockHex(t *testing.T) {
 		t.Errorf("want \"00000000000000000000000000000000000000000000000000000000000000000000000000000000917c5457000000006d792067656e6573697320626c6f636b2121\" but %q", blockHex)
 	}
 }
+
+type isValidBlockTestCase struct {
+	block     *Block
+	prevBlock *Block
+	ok        bool
+}
+
+var isValidBlockTestCases = []isValidBlockTestCase{
+	isValidBlockTestCase{
+		&Block{
+			Index:        2,
+			PreviousHash: "17aacbe244debc3869a4f604c8136da450283cba3e0467681f398af16871cc3f",
+			Timestamp:    1494177351,
+			Data:         "white noise",
+		},
+		genesisBlock,
+		false,
+	},
+	isValidBlockTestCase{
+		&Block{
+			Index:        1,
+			PreviousHash: "27aacbe244debc3869a4f604c8136da450283cba3e0467681f398af16871cc3f",
+			Timestamp:    1494177351,
+			Data:         "white noise",
+		},
+		genesisBlock,
+		false,
+	},
+	isValidBlockTestCase{
+		&Block{
+			Index:        1,
+			PreviousHash: "17aacbe244debc3869a4f604c8136da450283cba3e0467681f398af16871cc3f",
+			Timestamp:    1494177351,
+			Data:         "white noise",
+		},
+		genesisBlock,
+		true,
+	},
+}
+
+func TestIsValidBlock(t *testing.T) {
+	for _, testCase := range isValidBlockTestCases {
+		ok, err := isValidBlock(testCase.block, testCase.prevBlock)
+		if err != nil {
+			t.Fatalf("should not be fail: %v", err)
+		}
+		if ok != testCase.ok {
+			t.Errorf("want %t but %t", testCase.ok, ok)
+		}
+	}
+}
