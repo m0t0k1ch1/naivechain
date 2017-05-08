@@ -3,6 +3,7 @@ package main
 import (
 	"encoding/json"
 	"net/http"
+	"net/url"
 )
 
 func (node *Node) blocksHandler(w http.ResponseWriter, r *http.Request) {
@@ -56,7 +57,13 @@ func (node *Node) mineBlockHandler(w http.ResponseWriter, r *http.Request) {
 func (node *Node) peersHandler(w http.ResponseWriter, r *http.Request) {
 	peers := make([]string, len(node.sockets))
 	for i, socket := range node.sockets {
-		peers[i] = socket.RemoteAddr().String()
+		u, err := url.Parse(socket.RemoteAddr().String())
+		if err != nil {
+			node.error(w, err, "failed to parse peer address")
+			return
+		}
+
+		peers[i] = u.Host
 	}
 
 	b, err := json.Marshal(peers)
