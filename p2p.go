@@ -1,16 +1,60 @@
 package main
 
 import (
+	"net/url"
 	"time"
 
 	"golang.org/x/net/websocket"
 )
 
-func (node *Node) addSocket(ws *websocket.Conn) {
+const (
+	messageTypeQueryLatest = iota
+	messageTypeQueryAll
+	messageTypeResponseBlockchain
+)
+
+type Message struct {
+	Type int    `json:"type"`
+	Data string `json:"data"`
+}
+
+type Conn struct {
+	*websocket.Conn
+	id int64
+}
+
+func newConn(ws *websocket.Conn) *Conn {
+	return &Conn{
+		Conn: ws,
+		id:   time.Now().UnixNano(),
+	}
+}
+
+func (conn *Conn) remoteHost() string {
+	u, _ := url.Parse(conn.RemoteAddr().String())
+
+	return u.Host
+}
+
+func (node *Node) addConn(conn *Conn) {
 	node.mu.Lock()
 	defer node.mu.Unlock()
 
-	node.sockets = append(node.sockets, ws)
+	node.conns = append(node.conns, conn)
+}
+
+func (node *Node) deleteConnection(id int64) {
+	node.mu.Lock()
+	defer node.mu.Unlock()
+
+	conns := []*Conn{}
+	for _, conn := range node.conns {
+		if conn.id != id {
+			conns = append(conns, conn)
+		}
+	}
+
+	node.conns = conns
 }
 
 func (node *Node) connectToPeers(peers []string) {
@@ -20,15 +64,21 @@ func (node *Node) connectToPeers(peers []string) {
 			node.logError(err)
 			continue
 		}
-		node.addSocket(ws)
 
-		go node.p2pHandler(ws)
+		conn := newConn(ws)
+		node.addConn(conn)
+		go node.p2pHandler(conn)
 
 		// TODO: get latest block
 	}
 }
 
-func (node *Node) p2pHandler(ws *websocket.Conn) {
+func (node *Node) disconnectPeer(conn *Conn) {
+	defer conn.Close()
+	node.deleteConnection(conn.id)
+}
+
+func (node *Node) p2pHandler(conn *Conn) {
 	for {
 		// TODO: message handling
 		node.log("sleeping...")

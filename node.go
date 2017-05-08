@@ -20,7 +20,7 @@ type ErrorResponse struct {
 type Node struct {
 	*http.ServeMux
 	blockchain *Blockchain
-	sockets    []*websocket.Conn
+	conns      []*Conn
 	mu         sync.RWMutex
 	logger     *log.Logger
 }
@@ -28,7 +28,7 @@ type Node struct {
 func newNode() *Node {
 	return &Node{
 		blockchain: newBlockchain(),
-		sockets:    []*websocket.Conn{},
+		conns:      []*Conn{},
 		mu:         sync.RWMutex{},
 		logger: log.New(
 			os.Stdout,
@@ -54,8 +54,9 @@ func (node *Node) newApiServer() *http.Server {
 func (node *Node) newP2PServer() *http.Server {
 	return &http.Server{
 		Handler: websocket.Handler(func(ws *websocket.Conn) {
-			node.addSocket(ws)
-			node.p2pHandler(ws)
+			conn := newConn(ws)
+			node.addConn(conn)
+			go node.p2pHandler(conn)
 		}),
 		Addr: *p2pAddr,
 	}
