@@ -37,15 +37,9 @@ func (bc *Blockchain) getBlock(index int) *Block {
 }
 
 func (bc *Blockchain) generateBlock(data string) (*Block, error) {
-	prevBlock := bc.getLatestBlock()
-	prevBlockHash, err := prevBlock.hash()
-	if err != nil {
-		return nil, err
-	}
-
 	return &Block{
-		Index:        prevBlock.Index + 1,
-		PreviousHash: prevBlockHash,
+		Index:        bc.getLatestBlock().Index + 1,
+		PreviousHash: bc.getLatestBlock().hash(),
 		Timestamp:    time.Now().Unix(),
 		Data:         data,
 	}, nil
@@ -69,22 +63,8 @@ func (bc *Blockchain) replaceBlocks(bcNew *Blockchain) error {
 	return nil
 }
 
-func (bc *Blockchain) isValidGenesisBlock() (bool, error) {
-	genesisBlockHash, err := genesisBlock.hash()
-	if err != nil {
-		return false, err
-	}
-
-	firstBlock := bc.getGenesisBlock()
-	firstBlockHash, err := firstBlock.hash()
-	if err != nil {
-		return false, err
-	}
-	if firstBlockHash != genesisBlockHash {
-		return false, nil
-	}
-
-	return true, nil
+func (bc *Blockchain) isValidGenesisBlock() bool {
+	return bc.getGenesisBlock().hash() == genesisBlock.hash()
 }
 
 func (bc *Blockchain) isValid() (bool, error) {
@@ -94,12 +74,7 @@ func (bc *Blockchain) isValid() (bool, error) {
 	if bc.len() == 0 {
 		return false, nil
 	}
-
-	ok, err := bc.isValidGenesisBlock()
-	if err != nil {
-		return false, err
-	}
-	if !ok {
+	if !bc.isValidGenesisBlock() {
 		return false, nil
 	}
 

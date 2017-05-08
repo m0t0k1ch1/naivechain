@@ -25,12 +25,8 @@ func TestGenerateBlock(t *testing.T) {
 	if block.Data != "white noise" {
 		t.Errorf("want %q but %q", "white noise", block.Data)
 	}
-	prevBlockHash, err := bc.getLatestBlock().hash()
-	if err != nil {
-		t.Fatalf("should not be fail: %v", err)
-	}
-	if block.PreviousHash != prevBlockHash {
-		t.Errorf("want %q but %q", prevBlockHash, block.PreviousHash)
+	if block.PreviousHash != bc.getLatestBlock().hash() {
+		t.Errorf("want %q but %q", bc.getLatestBlock().hash(), block.PreviousHash)
 	}
 }
 
@@ -38,7 +34,7 @@ func TestAddBlock(t *testing.T) {
 	bc := newTestBlockchain([]*Block{genesisBlock})
 	block := &Block{
 		Index:        1,
-		PreviousHash: "17aacbe244debc3869a4f604c8136da450283cba3e0467681f398af16871cc3f",
+		PreviousHash: "7ca4c614ada5dc59875e7127bbf56083fc4d9ec73f039d3454b09f8891674c30",
 		Timestamp:    1494093545,
 		Data:         "white noise",
 	}
@@ -49,17 +45,8 @@ func TestAddBlock(t *testing.T) {
 	if bc.len() != 2 {
 		t.Fatalf("want %d but %d", 2, bc.len())
 	}
-
-	latestBlockHash, err := bc.getLatestBlock().hash()
-	if err != nil {
-		t.Fatalf("should not be fail: %v", err)
-	}
-	expectedBlockHash, err := block.hash()
-	if err != nil {
-		t.Fatalf("should not be fail: %v", err)
-	}
-	if latestBlockHash != expectedBlockHash {
-		t.Errorf("want %q but %q", expectedBlockHash, latestBlockHash)
+	if bc.getLatestBlock().hash() != block.hash() {
+		t.Errorf("want %q but %q", block.hash(), bc.getLatestBlock().hash())
 	}
 }
 
@@ -69,7 +56,7 @@ func TestReplaceBlocks(t *testing.T) {
 		genesisBlock,
 		&Block{
 			Index:        1,
-			PreviousHash: "17aacbe244debc3869a4f604c8136da450283cba3e0467681f398af16871cc3f",
+			PreviousHash: "7ca4c614ada5dc59875e7127bbf56083fc4d9ec73f039d3454b09f8891674c30",
 			Timestamp:    1494093545,
 			Data:         "white noise",
 		},
@@ -81,17 +68,8 @@ func TestReplaceBlocks(t *testing.T) {
 	if bc.len() != 2 {
 		t.Fatalf("want %d but %d", 2, bc.len())
 	}
-
-	latestBlockHash, err := bc.getLatestBlock().hash()
-	if err != nil {
-		t.Fatalf("should not be fail: %v", err)
-	}
-	expectedBlockHash, err := bcNew.getLatestBlock().hash()
-	if err != nil {
-		t.Fatalf("should not be fail: %v", err)
-	}
-	if latestBlockHash != expectedBlockHash {
-		t.Errorf("want %q but %q", expectedBlockHash, latestBlockHash)
+	if bc.getLatestBlock().hash() != bcNew.getLatestBlock().hash() {
+		t.Errorf("want %q but %q", bcNew.getLatestBlock().hash(), bc.getLatestBlock().hash())
 	}
 }
 
@@ -121,7 +99,7 @@ var isValidChainTestCases = []isValidChainTestCase{
 			genesisBlock,
 			&Block{
 				Index:        2,
-				PreviousHash: "17aacbe244debc3869a4f604c8136da450283cba3e0467681f398af16871cc3f",
+				PreviousHash: "7ca4c614ada5dc59875e7127bbf56083fc4d9ec73f039d3454b09f8891674c30",
 				Timestamp:    1494177351,
 				Data:         "white noise",
 			},
@@ -133,7 +111,7 @@ var isValidChainTestCases = []isValidChainTestCase{
 			genesisBlock,
 			&Block{
 				Index:        1,
-				PreviousHash: "27aacbe244debc3869a4f604c8136da450283cba3e0467681f398af16871cc3f",
+				PreviousHash: "8ca4c614ada5dc59875e7127bbf56083fc4d9ec73f039d3454b09f8891674c30",
 				Timestamp:    1494177351,
 				Data:         "white noise",
 			},
@@ -145,7 +123,7 @@ var isValidChainTestCases = []isValidChainTestCase{
 			genesisBlock,
 			&Block{
 				Index:        1,
-				PreviousHash: "17aacbe244debc3869a4f604c8136da450283cba3e0467681f398af16871cc3f",
+				PreviousHash: "7ca4c614ada5dc59875e7127bbf56083fc4d9ec73f039d3454b09f8891674c30",
 				Timestamp:    1494177351,
 				Data:         "white noise",
 			},

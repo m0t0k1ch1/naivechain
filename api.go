@@ -31,11 +31,6 @@ func (node *Node) mineBlockHandler(w http.ResponseWriter, r *http.Request) {
 		node.error(w, err, "failed to generate block")
 		return
 	}
-	blockHash, err := block.hash()
-	if err != nil {
-		node.error(w, err, "failed to hash block")
-		return
-	}
 
 	if err := node.blockchain.addBlock(block); err != nil {
 		node.error(w, err, "failed to add block")
@@ -45,7 +40,7 @@ func (node *Node) mineBlockHandler(w http.ResponseWriter, r *http.Request) {
 	// TODO: broadcast
 
 	b, err := json.Marshal(map[string]string{
-		"hash": blockHash,
+		"hash": block.hash(),
 	})
 	if err != nil {
 		node.error(w, err, "failed to decode response")
