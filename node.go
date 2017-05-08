@@ -56,7 +56,7 @@ func (node *Node) newP2PServer() *http.Server {
 		Handler: websocket.Handler(func(ws *websocket.Conn) {
 			conn := newConn(ws)
 			node.addConn(conn)
-			go node.p2pHandler(conn)
+			node.p2pHandler(conn)
 		}),
 		Addr: *p2pAddr,
 	}

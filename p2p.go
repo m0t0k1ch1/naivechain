@@ -1,6 +1,8 @@
 package main
 
 import (
+	"encoding/json"
+	"io"
 	"net/url"
 	"time"
 
@@ -80,8 +82,32 @@ func (node *Node) disconnectPeer(conn *Conn) {
 
 func (node *Node) p2pHandler(conn *Conn) {
 	for {
-		// TODO: message handling
-		node.log("sleeping...")
-		time.Sleep(3 * time.Second)
+		var b []byte
+		if err := websocket.Message.Receive(conn.Conn, &b); err != nil {
+			if err == io.EOF {
+				node.log("disconnect peer:", conn.remoteHost())
+				node.disconnectPeer(conn)
+				break
+			}
+			node.logError(err)
+			continue
+		}
+
+		var msg Message
+		if err := json.Unmarshal(b, &msg); err != nil {
+			node.logError(err)
+			continue
+		}
+
+		switch msg.Type {
+		case messageTypeQueryLatest:
+			// TODO
+		case messageTypeQueryAll:
+			// TODO
+		case messageTypeResponseBlockchain:
+			// TODO
+		default:
+			node.logError(ErrUnknownMessageType)
+		}
 	}
 }
