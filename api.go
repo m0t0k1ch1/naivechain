@@ -35,6 +35,7 @@ func (node *Node) mineBlockHandler(w http.ResponseWriter, r *http.Request) {
 	})
 	if err != nil {
 		node.error(w, err, "failed to decode response")
+		return
 	}
 
 	node.writeResponse(w, b)
