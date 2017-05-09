@@ -55,6 +55,7 @@ func (node *Node) newP2PServer() *http.Server {
 	return &http.Server{
 		Handler: websocket.Handler(func(ws *websocket.Conn) {
 			conn := newConn(ws)
+			node.log("connect to peer:", conn.remoteHost())
 			node.addConn(conn)
 			node.p2pHandler(conn)
 		}),

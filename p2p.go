@@ -68,6 +68,7 @@ func (node *Node) connectToPeers(peers []string) {
 		}
 
 		conn := newConn(ws)
+		node.log("connect to peer:", conn.remoteHost())
 		node.addConn(conn)
 		go node.p2pHandler(conn)
 
@@ -77,6 +78,7 @@ func (node *Node) connectToPeers(peers []string) {
 
 func (node *Node) disconnectPeer(conn *Conn) {
 	defer conn.Close()
+	node.log("disconnect peer:", conn.remoteHost())
 	node.deleteConn(conn.id)
 }
 
@@ -85,13 +87,14 @@ func (node *Node) p2pHandler(conn *Conn) {
 		var b []byte
 		if err := websocket.Message.Receive(conn.Conn, &b); err != nil {
 			if err == io.EOF {
-				node.log("disconnect peer:", conn.remoteHost())
 				node.disconnectPeer(conn)
 				break
 			}
 			node.logError(err)
 			continue
 		}
+
+		node.log("receive message:", string(b))
 
 		var msg Message
 		if err := json.Unmarshal(b, &msg); err != nil {
