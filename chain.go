@@ -82,11 +82,7 @@ func (bc *Blockchain) isValid() (bool, error) {
 	for i := 1; i < bc.len(); i++ {
 		block := bc.getBlock(i)
 
-		ok, err := isValidBlock(block, prevBlock)
-		if err != nil {
-			return false, err
-		}
-		if !ok {
+		if ok := isValidBlock(block, prevBlock); !ok {
 			return false, nil
 		}
 

@@ -49,11 +49,7 @@ var isValidBlockTestCases = []isValidBlockTestCase{
 
 func TestIsValidBlock(t *testing.T) {
 	for _, testCase := range isValidBlockTestCases {
-		ok, err := isValidBlock(testCase.block, testCase.prevBlock)
-		if err != nil {
-			t.Fatalf("should not be fail: %v", err)
-		}
-		if ok != testCase.ok {
+		if ok := isValidBlock(testCase.block, testCase.prevBlock); ok != testCase.ok {
 			t.Errorf("want %t but %t", testCase.ok, ok)
 		}
 	}

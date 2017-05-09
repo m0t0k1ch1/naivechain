@@ -20,22 +20,13 @@ type Block struct {
 }
 
 func (block *Block) hash() string {
-	return fmt.Sprintf("%x",
-		sha256.Sum256([]byte(fmt.Sprintf(
-			"%d%s%d%s",
-			block.Index, block.PreviousHash, block.Timestamp, block.Data,
-		))),
-	)
+	return fmt.Sprintf("%x", sha256.Sum256([]byte(fmt.Sprintf(
+		"%d%s%d%s",
+		block.Index, block.PreviousHash, block.Timestamp, block.Data,
+	))))
 }
 
-func isValidBlock(block, prevBlock *Block) (bool, error) {
-	if block.Index != prevBlock.Index+1 {
-		return false, nil
-	}
-
-	if block.PreviousHash != prevBlock.hash() {
-		return false, nil
-	}
-
-	return true, nil
+func isValidBlock(block, prevBlock *Block) bool {
+	return block.Index == prevBlock.Index+1 &&
+		block.PreviousHash == prevBlock.hash()
 }
