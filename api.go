@@ -31,10 +31,7 @@ func (node *Node) mineBlockHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if err := node.blockchain.addBlock(block); err != nil {
-		node.error(w, err, "failed to add block")
-		return
-	}
+	node.blockchain.addBlock(block)
 
 	// TODO: broadcast
 

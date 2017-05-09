@@ -45,22 +45,18 @@ func (bc *Blockchain) generateBlock(data string) (*Block, error) {
 	}, nil
 }
 
-func (bc *Blockchain) addBlock(block *Block) error {
+func (bc *Blockchain) addBlock(block *Block) {
 	bc.mu.Lock()
 	defer bc.mu.Unlock()
 
 	bc.blocks = append(bc.blocks, block)
-
-	return nil
 }
 
-func (bc *Blockchain) replaceBlocks(bcNew *Blockchain) error {
+func (bc *Blockchain) replaceBlocks(bcNew *Blockchain) {
 	bc.mu.Lock()
 	defer bc.mu.Unlock()
 
 	bc.blocks = bcNew.blocks
-
-	return nil
 }
 
 func (bc *Blockchain) isValidGenesisBlock() bool {

@@ -39,9 +39,7 @@ func TestAddBlock(t *testing.T) {
 		Data:         "white noise",
 	}
 
-	if err := bc.addBlock(block); err != nil {
-		t.Fatalf("should not be fail: %v", err)
-	}
+	bc.addBlock(block)
 	if bc.len() != 2 {
 		t.Fatalf("want %d but %d", 2, bc.len())
 	}
@@ -62,9 +60,7 @@ func TestReplaceBlocks(t *testing.T) {
 		},
 	})
 
-	if err := bc.replaceBlocks(bcNew); err != nil {
-		t.Fatalf("should not be fail: %v", err)
-	}
+	bc.replaceBlocks(bcNew)
 	if bc.len() != 2 {
 		t.Fatalf("want %d but %d", 2, bc.len())
 	}
