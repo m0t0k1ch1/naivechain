@@ -63,15 +63,15 @@ func (bc *Blockchain) isValidGenesisBlock() bool {
 	return bc.getGenesisBlock().hash() == genesisBlock.hash()
 }
 
-func (bc *Blockchain) isValid() (bool, error) {
+func (bc *Blockchain) isValid() bool {
 	bc.mu.RLock()
 	defer bc.mu.RUnlock()
 
 	if bc.len() == 0 {
-		return false, nil
+		return false
 	}
 	if !bc.isValidGenesisBlock() {
-		return false, nil
+		return false
 	}
 
 	prevBlock := bc.getGenesisBlock()
@@ -79,11 +79,11 @@ func (bc *Blockchain) isValid() (bool, error) {
 		block := bc.getBlock(i)
 
 		if ok := isValidBlock(block, prevBlock); !ok {
-			return false, nil
+			return false
 		}
 
 		prevBlock = block
 	}
 
-	return true, nil
+	return true
 }

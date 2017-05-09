@@ -127,11 +127,7 @@ var isValidChainTestCases = []isValidChainTestCase{
 
 func TestIsValidChain(t *testing.T) {
 	for _, testCase := range isValidChainTestCases {
-		ok, err := testCase.blockchain.isValid()
-		if err != nil {
-			t.Fatalf("should not be fail: %v", err)
-		}
-		if ok != testCase.ok {
+		if ok := testCase.blockchain.isValid(); ok != testCase.ok {
 			t.Errorf("want %t but %t", testCase.ok, ok)
 		}
 	}
