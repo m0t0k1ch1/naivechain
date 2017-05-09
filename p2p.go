@@ -45,7 +45,7 @@ func (node *Node) addConn(conn *Conn) {
 	node.conns = append(node.conns, conn)
 }
 
-func (node *Node) deleteConnection(id int64) {
+func (node *Node) deleteConn(id int64) {
 	node.mu.Lock()
 	defer node.mu.Unlock()
 
@@ -77,7 +77,7 @@ func (node *Node) connectToPeers(peers []string) {
 
 func (node *Node) disconnectPeer(conn *Conn) {
 	defer conn.Close()
-	node.deleteConnection(conn.id)
+	node.deleteConn(conn.id)
 }
 
 func (node *Node) p2pHandler(conn *Conn) {
