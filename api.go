@@ -25,12 +25,7 @@ func (node *Node) mineBlockHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	block, err := node.blockchain.generateBlock(params.Data)
-	if err != nil {
-		node.error(w, err, "failed to generate block")
-		return
-	}
-
+	block := node.blockchain.generateBlock(params.Data)
 	node.blockchain.addBlock(block)
 
 	// TODO: broadcast

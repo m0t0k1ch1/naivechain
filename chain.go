@@ -36,13 +36,13 @@ func (bc *Blockchain) getBlock(index int) *Block {
 	return bc.blocks[index]
 }
 
-func (bc *Blockchain) generateBlock(data string) (*Block, error) {
+func (bc *Blockchain) generateBlock(data string) *Block {
 	return &Block{
 		Index:        bc.getLatestBlock().Index + 1,
 		PreviousHash: bc.getLatestBlock().hash(),
 		Timestamp:    time.Now().Unix(),
 		Data:         data,
-	}, nil
+	}
 }
 
 func (bc *Blockchain) addBlock(block *Block) {

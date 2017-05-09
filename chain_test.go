@@ -15,10 +15,7 @@ func newTestBlockchain(blocks []*Block) *Blockchain {
 func TestGenerateBlock(t *testing.T) {
 	bc := newTestBlockchain([]*Block{genesisBlock})
 
-	block, err := bc.generateBlock("white noise")
-	if err != nil {
-		t.Fatalf("should not be fail: %v", err)
-	}
+	block := bc.generateBlock("white noise")
 	if block.Index != bc.getLatestBlock().Index+1 {
 		t.Errorf("want %d but %d", bc.getLatestBlock().Index+1, block.Index)
 	}
