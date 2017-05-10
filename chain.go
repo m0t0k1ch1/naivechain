@@ -6,13 +6,13 @@ import (
 )
 
 type Blockchain struct {
-	blocks []*Block
+	blocks Blocks
 	mu     sync.RWMutex
 }
 
 func newBlockchain() *Blockchain {
 	return &Blockchain{
-		blocks: []*Block{genesisBlock},
+		blocks: Blocks{genesisBlock},
 		mu:     sync.RWMutex{},
 	}
 }

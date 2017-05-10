@@ -13,6 +13,20 @@ var genesisBlock = &Block{
 	Hash:         "816534932c2b7154836da6afc367695e6337db8a921823784c14378abed4f7d7",
 }
 
+type Blocks []*Block
+
+func (blocks Blocks) Len() int {
+	return len(blocks)
+}
+
+func (blocks Blocks) Swap(i, j int) {
+	blocks[i], blocks[j] = blocks[j], blocks[i]
+}
+
+func (blocks Blocks) Less(i, j int) bool {
+	return blocks[i].Index < blocks[j].Index
+}
+
 type Block struct {
 	Index        int64  `json:"index"`
 	PreviousHash string `json:"previousHash"`

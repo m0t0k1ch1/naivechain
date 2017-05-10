@@ -5,7 +5,7 @@ import (
 	"testing"
 )
 
-func newTestBlockchain(blocks []*Block) *Blockchain {
+func newTestBlockchain(blocks Blocks) *Blockchain {
 	return &Blockchain{
 		blocks: blocks,
 		mu:     sync.RWMutex{},
@@ -13,7 +13,7 @@ func newTestBlockchain(blocks []*Block) *Blockchain {
 }
 
 func TestGenerateBlock(t *testing.T) {
-	bc := newTestBlockchain([]*Block{testGenesisBlock})
+	bc := newTestBlockchain(Blocks{testGenesisBlock})
 
 	block := bc.generateBlock("white noise")
 	if block.Index != bc.getLatestBlock().Index+1 {
@@ -28,7 +28,7 @@ func TestGenerateBlock(t *testing.T) {
 }
 
 func TestAddBlock(t *testing.T) {
-	bc := newTestBlockchain([]*Block{testGenesisBlock})
+	bc := newTestBlockchain(Blocks{testGenesisBlock})
 	block := &Block{
 		Index:        1,
 		PreviousHash: testGenesisBlock.Hash,
@@ -47,8 +47,8 @@ func TestAddBlock(t *testing.T) {
 }
 
 func TestReplaceBlocks(t *testing.T) {
-	bc := newTestBlockchain([]*Block{testGenesisBlock})
-	bcNew := newTestBlockchain([]*Block{
+	bc := newTestBlockchain(Blocks{testGenesisBlock})
+	bcNew := newTestBlockchain(Blocks{
 		testGenesisBlock,
 		&Block{
 			Index:        1,
@@ -77,12 +77,12 @@ type isValidChainTestCase struct {
 var isValidChainTestCases = []isValidChainTestCase{
 	isValidChainTestCase{
 		"empty",
-		newTestBlockchain([]*Block{}),
+		newTestBlockchain(Blocks{}),
 		false,
 	},
 	isValidChainTestCase{
 		"invalid genesis block",
-		newTestBlockchain([]*Block{
+		newTestBlockchain(Blocks{
 			&Block{
 				Index:        0,
 				PreviousHash: "0",
@@ -95,7 +95,7 @@ var isValidChainTestCases = []isValidChainTestCase{
 	},
 	isValidChainTestCase{
 		"invalid block",
-		newTestBlockchain([]*Block{
+		newTestBlockchain(Blocks{
 			testGenesisBlock,
 			&Block{
 				Index:        2,
@@ -109,7 +109,7 @@ var isValidChainTestCases = []isValidChainTestCase{
 	},
 	isValidChainTestCase{
 		"valid",
-		newTestBlockchain([]*Block{
+		newTestBlockchain(Blocks{
 			testGenesisBlock,
 			&Block{
 				Index:        1,

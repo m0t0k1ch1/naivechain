@@ -44,7 +44,7 @@ func (node *Node) queryAll(conn *Conn) error {
 }
 
 func (node *Node) responseLatest(conn *Conn) error {
-	msg, err := newBlocksMessage([]*Block{node.blockchain.getLatestBlock()})
+	msg, err := newBlocksMessage(Blocks{node.blockchain.getLatestBlock()})
 	if err != nil {
 		return err
 	}

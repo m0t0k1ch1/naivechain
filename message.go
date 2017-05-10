@@ -28,7 +28,7 @@ type Message struct {
 	Data string      `json:"data"`
 }
 
-func newBlocksMessage(blocks []*Block) (*Message, error) {
+func newBlocksMessage(blocks Blocks) (*Message, error) {
 	b, err := json.Marshal(blocks)
 	if err != nil {
 		return nil, err
