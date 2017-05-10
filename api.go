@@ -30,7 +30,9 @@ func (node *Node) mineBlockHandler(w http.ResponseWriter, r *http.Request) {
 	block := node.blockchain.generateBlock(params.Data)
 	node.blockchain.addBlock(block)
 
-	// TODO: broadcast
+	if err := node.broadcastLatestBlock(); err != nil {
+		node.logError(err)
+	}
 
 	b, err := json.Marshal(map[string]string{
 		"hash": block.hash(),
@@ -79,7 +81,7 @@ func (node *Node) addPeerHandler(w http.ResponseWriter, r *http.Request) {
 	node.addConn(conn)
 	go node.p2pHandler(conn)
 
-	if err := node.queryLatest(conn); err != nil {
+	if err := node.send(conn, newQueryLatestMessage()); err != nil {
 		node.logError(err)
 	}
 

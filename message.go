@@ -5,9 +5,9 @@ import "encoding/json"
 type MessageType int
 
 const (
-	MessageTypeQueryLatest    MessageType = iota
-	MessageTypeQueryAll       MessageType = iota
-	MessageTypeResponseBlocks MessageType = iota
+	MessageTypeQueryLatest MessageType = iota
+	MessageTypeQueryAll    MessageType = iota
+	MessageTypeBlocks      MessageType = iota
 )
 
 func (ms MessageType) name() string {
@@ -16,8 +16,8 @@ func (ms MessageType) name() string {
 		return "QUERY_LATEST"
 	case MessageTypeQueryAll:
 		return "QUERY_ALL"
-	case MessageTypeResponseBlocks:
-		return "RESPONSE_BLOCKS"
+	case MessageTypeBlocks:
+		return "BLOCKS"
 	default:
 		return "UNKNOWN"
 	}
@@ -26,18 +26,6 @@ func (ms MessageType) name() string {
 type Message struct {
 	Type MessageType `json:"type"`
 	Data string      `json:"data"`
-}
-
-func newBlocksMessage(blocks Blocks) (*Message, error) {
-	b, err := json.Marshal(blocks)
-	if err != nil {
-		return nil, err
-	}
-
-	return &Message{
-		Type: MessageTypeResponseBlocks,
-		Data: string(b),
-	}, nil
 }
 
 func newQueryLatestMessage() *Message {
@@ -50,4 +38,16 @@ func newQueryAllMessage() *Message {
 	return &Message{
 		Type: MessageTypeQueryAll,
 	}
+}
+
+func newBlocksMessage(blocks Blocks) (*Message, error) {
+	b, err := json.Marshal(blocks)
+	if err != nil {
+		return nil, err
+	}
+
+	return &Message{
+		Type: MessageTypeBlocks,
+		Data: string(b),
+	}, nil
 }

@@ -55,11 +55,11 @@ func (bc *Blockchain) addBlock(block *Block) {
 	bc.blocks = append(bc.blocks, block)
 }
 
-func (bc *Blockchain) replaceBlocks(bcNew *Blockchain) {
+func (bc *Blockchain) replaceBlocks(blocks Blocks) {
 	bc.mu.Lock()
 	defer bc.mu.Unlock()
 
-	bc.blocks = bcNew.blocks
+	bc.blocks = blocks
 }
 
 func (bc *Blockchain) isValidGenesisBlock() bool {
