@@ -48,7 +48,7 @@ func TestAddBlock(t *testing.T) {
 
 func TestReplaceBlocks(t *testing.T) {
 	bc := newTestBlockchain(Blocks{testGenesisBlock})
-	bcNew := newTestBlockchain(Blocks{
+	blocks := Blocks{
 		testGenesisBlock,
 		&Block{
 			Index:        1,
@@ -57,14 +57,14 @@ func TestReplaceBlocks(t *testing.T) {
 			Data:         "white noise",
 			Hash:         "1cee23ac6ce3589aedbd92213e0dbf8ab41f8f8e6181a92c1a8243df4b32078b",
 		},
-	})
+	}
 
-	bc.replaceBlocks(bcNew)
+	bc.replaceBlocks(blocks)
 	if bc.len() != 2 {
 		t.Fatalf("want %d but %d", 2, bc.len())
 	}
-	if bc.getLatestBlock().Hash != bcNew.getLatestBlock().Hash {
-		t.Errorf("want %q but %q", bcNew.getLatestBlock().Hash, bc.getLatestBlock().Hash)
+	if bc.getLatestBlock().Hash != blocks[len(blocks)-1].Hash {
+		t.Errorf("want %q but %q", blocks[len(blocks)-1].Hash, bc.getLatestBlock().Hash)
 	}
 }
 
