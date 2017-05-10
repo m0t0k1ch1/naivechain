@@ -2,13 +2,22 @@ package main
 
 import "testing"
 
+var testGenesisBlock = &Block{
+	Index:        0,
+	PreviousHash: "0",
+	Timestamp:    1465154705,
+	Data:         "my genesis block!!",
+	Hash:         "816534932c2b7154836da6afc367695e6337db8a921823784c14378abed4f7d7",
+}
+
 func TestBlockHash(t *testing.T) {
-	if genesisBlock.hash() != "7ca4c614ada5dc59875e7127bbf56083fc4d9ec73f039d3454b09f8891674c30" {
-		t.Errorf("want %q but %q", "7ca4c614ada5dc59875e7127bbf56083fc4d9ec73f039d3454b09f8891674c30", genesisBlock.hash())
+	if testGenesisBlock.hash() != testGenesisBlock.Hash {
+		t.Errorf("want %q but %q", testGenesisBlock.Hash, testGenesisBlock.hash())
 	}
 }
 
 type isValidBlockTestCase struct {
+	name      string
 	block     *Block
 	prevBlock *Block
 	ok        bool
@@ -16,33 +25,51 @@ type isValidBlockTestCase struct {
 
 var isValidBlockTestCases = []isValidBlockTestCase{
 	isValidBlockTestCase{
+		"invalid index",
 		&Block{
 			Index:        2,
-			PreviousHash: "7ca4c614ada5dc59875e7127bbf56083fc4d9ec73f039d3454b09f8891674c30",
+			PreviousHash: testGenesisBlock.Hash,
 			Timestamp:    1494177351,
 			Data:         "white noise",
+			Hash:         "6e27d73b81b2abf47e6766b8aad12a114614fccac669d0d2162cb842f0484420",
 		},
-		genesisBlock,
+		testGenesisBlock,
 		false,
 	},
 	isValidBlockTestCase{
+		"invalid previous hash",
 		&Block{
 			Index:        1,
-			PreviousHash: "8ca4c614ada5dc59875e7127bbf56083fc4d9ec73f039d3454b09f8891674c30",
+			PreviousHash: "016534932c2b7154836da6afc367695e6337db8a921823784c14378abed4f7d7",
 			Timestamp:    1494177351,
 			Data:         "white noise",
+			Hash:         "03bf0215fef25dbf56e7b26ac57f7412cd10aea5e9f2bd8056a349bfaa15bfa5",
 		},
-		genesisBlock,
+		testGenesisBlock,
 		false,
 	},
 	isValidBlockTestCase{
+		"invalid hash",
 		&Block{
 			Index:        1,
-			PreviousHash: "7ca4c614ada5dc59875e7127bbf56083fc4d9ec73f039d3454b09f8891674c30",
+			PreviousHash: testGenesisBlock.Hash,
 			Timestamp:    1494177351,
 			Data:         "white noise",
+			Hash:         testGenesisBlock.Hash,
 		},
-		genesisBlock,
+		testGenesisBlock,
+		false,
+	},
+	isValidBlockTestCase{
+		"valid",
+		&Block{
+			Index:        1,
+			PreviousHash: testGenesisBlock.Hash,
+			Timestamp:    1494177351,
+			Data:         "white noise",
+			Hash:         "1cee23ac6ce3589aedbd92213e0dbf8ab41f8f8e6181a92c1a8243df4b32078b",
+		},
+		testGenesisBlock,
 		true,
 	},
 }
@@ -50,7 +77,7 @@ var isValidBlockTestCases = []isValidBlockTestCase{
 func TestIsValidBlock(t *testing.T) {
 	for _, testCase := range isValidBlockTestCases {
 		if ok := isValidBlock(testCase.block, testCase.prevBlock); ok != testCase.ok {
-			t.Errorf("want %t but %t", testCase.ok, ok)
+			t.Errorf("[%s] want %t but %t", testCase.name, testCase.ok, ok)
 		}
 	}
 }

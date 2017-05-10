@@ -37,12 +37,15 @@ func (bc *Blockchain) getBlock(index int) *Block {
 }
 
 func (bc *Blockchain) generateBlock(data string) *Block {
-	return &Block{
+	block := &Block{
 		Index:        bc.getLatestBlock().Index + 1,
-		PreviousHash: bc.getLatestBlock().hash(),
+		PreviousHash: bc.getLatestBlock().Hash,
 		Timestamp:    time.Now().Unix(),
 		Data:         data,
 	}
+	block.Hash = block.hash()
+
+	return block
 }
 
 func (bc *Blockchain) addBlock(block *Block) {
@@ -60,7 +63,10 @@ func (bc *Blockchain) replaceBlocks(bcNew *Blockchain) {
 }
 
 func (bc *Blockchain) isValidGenesisBlock() bool {
-	return bc.getGenesisBlock().hash() == genesisBlock.hash()
+	block := bc.getGenesisBlock()
+
+	return block.Hash == genesisBlock.Hash &&
+		block.isValidHash()
 }
 
 func (bc *Blockchain) isValid() bool {

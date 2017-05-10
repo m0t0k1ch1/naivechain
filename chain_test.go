@@ -13,7 +13,7 @@ func newTestBlockchain(blocks []*Block) *Blockchain {
 }
 
 func TestGenerateBlock(t *testing.T) {
-	bc := newTestBlockchain([]*Block{genesisBlock})
+	bc := newTestBlockchain([]*Block{testGenesisBlock})
 
 	block := bc.generateBlock("white noise")
 	if block.Index != bc.getLatestBlock().Index+1 {
@@ -22,38 +22,40 @@ func TestGenerateBlock(t *testing.T) {
 	if block.Data != "white noise" {
 		t.Errorf("want %q but %q", "white noise", block.Data)
 	}
-	if block.PreviousHash != bc.getLatestBlock().hash() {
-		t.Errorf("want %q but %q", bc.getLatestBlock().hash(), block.PreviousHash)
+	if block.PreviousHash != bc.getLatestBlock().Hash {
+		t.Errorf("want %q but %q", bc.getLatestBlock().Hash, block.PreviousHash)
 	}
 }
 
 func TestAddBlock(t *testing.T) {
-	bc := newTestBlockchain([]*Block{genesisBlock})
+	bc := newTestBlockchain([]*Block{testGenesisBlock})
 	block := &Block{
 		Index:        1,
-		PreviousHash: "7ca4c614ada5dc59875e7127bbf56083fc4d9ec73f039d3454b09f8891674c30",
-		Timestamp:    1494093545,
+		PreviousHash: testGenesisBlock.Hash,
+		Timestamp:    1494177351,
 		Data:         "white noise",
+		Hash:         "1cee23ac6ce3589aedbd92213e0dbf8ab41f8f8e6181a92c1a8243df4b32078b",
 	}
 
 	bc.addBlock(block)
 	if bc.len() != 2 {
 		t.Fatalf("want %d but %d", 2, bc.len())
 	}
-	if bc.getLatestBlock().hash() != block.hash() {
-		t.Errorf("want %q but %q", block.hash(), bc.getLatestBlock().hash())
+	if bc.getLatestBlock().Hash != block.Hash {
+		t.Errorf("want %q but %q", block.Hash, bc.getLatestBlock().Hash)
 	}
 }
 
 func TestReplaceBlocks(t *testing.T) {
-	bc := newTestBlockchain([]*Block{genesisBlock})
+	bc := newTestBlockchain([]*Block{testGenesisBlock})
 	bcNew := newTestBlockchain([]*Block{
-		genesisBlock,
+		testGenesisBlock,
 		&Block{
 			Index:        1,
-			PreviousHash: "7ca4c614ada5dc59875e7127bbf56083fc4d9ec73f039d3454b09f8891674c30",
+			PreviousHash: testGenesisBlock.Hash,
 			Timestamp:    1494093545,
 			Data:         "white noise",
+			Hash:         "1cee23ac6ce3589aedbd92213e0dbf8ab41f8f8e6181a92c1a8243df4b32078b",
 		},
 	})
 
@@ -61,64 +63,60 @@ func TestReplaceBlocks(t *testing.T) {
 	if bc.len() != 2 {
 		t.Fatalf("want %d but %d", 2, bc.len())
 	}
-	if bc.getLatestBlock().hash() != bcNew.getLatestBlock().hash() {
-		t.Errorf("want %q but %q", bcNew.getLatestBlock().hash(), bc.getLatestBlock().hash())
+	if bc.getLatestBlock().Hash != bcNew.getLatestBlock().Hash {
+		t.Errorf("want %q but %q", bcNew.getLatestBlock().Hash, bc.getLatestBlock().Hash)
 	}
 }
 
 type isValidChainTestCase struct {
+	name       string
 	blockchain *Blockchain
 	ok         bool
 }
 
 var isValidChainTestCases = []isValidChainTestCase{
 	isValidChainTestCase{
+		"empty",
 		newTestBlockchain([]*Block{}),
 		false,
 	},
 	isValidChainTestCase{
+		"invalid genesis block",
 		newTestBlockchain([]*Block{
 			&Block{
 				Index:        0,
-				PreviousHash: "0000000000000000000000000000000000000000000000000000000000000000",
+				PreviousHash: "0",
 				Timestamp:    1465154705,
 				Data:         "bad genesis block!!",
+				Hash:         "627ab16dbcede0cfa91c85a88c30c4eaae41b8500a961d0d09451323c6e25bf8",
 			},
 		}),
 		false,
 	},
 	isValidChainTestCase{
+		"invalid block",
 		newTestBlockchain([]*Block{
-			genesisBlock,
+			testGenesisBlock,
 			&Block{
 				Index:        2,
-				PreviousHash: "7ca4c614ada5dc59875e7127bbf56083fc4d9ec73f039d3454b09f8891674c30",
+				PreviousHash: testGenesisBlock.Hash,
 				Timestamp:    1494177351,
 				Data:         "white noise",
+				Hash:         "6e27d73b81b2abf47e6766b8aad12a114614fccac669d0d2162cb842f0484420",
 			},
 		}),
 		false,
 	},
 	isValidChainTestCase{
+		"valid",
 		newTestBlockchain([]*Block{
-			genesisBlock,
+			testGenesisBlock,
 			&Block{
 				Index:        1,
-				PreviousHash: "8ca4c614ada5dc59875e7127bbf56083fc4d9ec73f039d3454b09f8891674c30",
+				PreviousHash: testGenesisBlock.Hash,
 				Timestamp:    1494177351,
 				Data:         "white noise",
-			},
-		}),
-		false,
-	},
-	isValidChainTestCase{
-		newTestBlockchain([]*Block{
-			genesisBlock,
-			&Block{
-				Index:        1,
-				PreviousHash: "7ca4c614ada5dc59875e7127bbf56083fc4d9ec73f039d3454b09f8891674c30",
-				Timestamp:    1494177351,
-				Data:         "white noise",
+				Hash:         "1cee23ac6ce3589aedbd92213e0dbf8ab41f8f8e6181a92c1a8243df4b32078b",
 			},
 		}),
 		true,
@@ -128,7 +126,7 @@ var isValidChainTestCases = []isValidChainTestCase{
 func TestIsValidChain(t *testing.T) {
 	for _, testCase := range isValidChainTestCases {
 		if ok := testCase.blockchain.isValid(); ok != testCase.ok {
-			t.Errorf("want %t but %t", testCase.ok, ok)
+			t.Errorf("[%s] want %t but %t", testCase.name, testCase.ok, ok)
 		}
 	}
 }
