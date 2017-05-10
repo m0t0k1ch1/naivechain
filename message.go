@@ -2,21 +2,21 @@ package main
 
 import "encoding/json"
 
-type messageType int
+type MessageType int
 
 const (
-	messageTypeQueryLatest    messageType = iota
-	messageTypeQueryAll       messageType = iota
-	messageTypeResponseBlocks messageType = iota
+	MessageTypeQueryLatest    MessageType = iota
+	MessageTypeQueryAll       MessageType = iota
+	MessageTypeResponseBlocks MessageType = iota
 )
 
-func (ms messageType) name() string {
+func (ms MessageType) name() string {
 	switch ms {
-	case messageTypeQueryLatest:
+	case MessageTypeQueryLatest:
 		return "QUERY_LATEST"
-	case messageTypeQueryAll:
+	case MessageTypeQueryAll:
 		return "QUERY_ALL"
-	case messageTypeResponseBlocks:
+	case MessageTypeResponseBlocks:
 		return "RESPONSE_BLOCKS"
 	default:
 		return "UNKNOWN"
@@ -24,7 +24,7 @@ func (ms messageType) name() string {
 }
 
 type Message struct {
-	Type messageType `json:"type"`
+	Type MessageType `json:"type"`
 	Data string      `json:"data"`
 }
 
@@ -35,19 +35,19 @@ func newBlocksMessage(blocks []*Block) (*Message, error) {
 	}
 
 	return &Message{
-		Type: messageTypeResponseBlocks,
+		Type: MessageTypeResponseBlocks,
 		Data: string(b),
 	}, nil
 }
 
 func newQueryLatestMessage() *Message {
 	return &Message{
-		Type: messageTypeQueryLatest,
+		Type: MessageTypeQueryLatest,
 	}
 }
 
 func newQueryAllMessage() *Message {
 	return &Message{
-		Type: messageTypeQueryAll,
+		Type: MessageTypeQueryAll,
 	}
 }

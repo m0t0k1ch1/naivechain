@@ -104,15 +104,15 @@ func (node *Node) p2pHandler(conn *Conn) {
 		))
 
 		switch msg.Type {
-		case messageTypeQueryLatest:
+		case MessageTypeQueryLatest:
 			if err := node.responseLatest(conn); err != nil {
 				node.logError(err)
 			}
-		case messageTypeQueryAll:
+		case MessageTypeQueryAll:
 			if err := node.responseAll(conn); err != nil {
 				node.logError(err)
 			}
-		case messageTypeResponseBlocks:
+		case MessageTypeResponseBlocks:
 			if err := node.handleBlocksResponse(msg); err != nil {
 				node.logError(err)
 			}
