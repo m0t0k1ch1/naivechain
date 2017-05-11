@@ -36,23 +36,12 @@ func (node *Node) disconnectPeer(conn *Conn) {
 	node.deleteConn(conn.id)
 }
 
-func (node *Node) newLatestBlockMessage() (*Message, error) {
+func (node *Node) newLatestBlockMessage() *Message {
 	return newBlocksMessage(Blocks{node.blockchain.getLatestBlock()})
 }
 
-func (node *Node) newAllBlocksMessage() (*Message, error) {
+func (node *Node) newAllBlocksMessage() *Message {
 	return newBlocksMessage(node.blockchain.blocks)
-}
-
-func (node *Node) broadcastLatestBlock() error {
-	msg, err := node.newLatestBlockMessage()
-	if err != nil {
-		return err
-	}
-
-	node.broadcast(msg)
-
-	return nil
 }
 
 func (node *Node) broadcast(msg *Message) {
@@ -61,24 +50,6 @@ func (node *Node) broadcast(msg *Message) {
 			node.logError(err)
 		}
 	}
-}
-
-func (node *Node) sendLatestBlock(conn *Conn) error {
-	msg, err := node.newLatestBlockMessage()
-	if err != nil {
-		return err
-	}
-
-	return node.send(conn, msg)
-}
-
-func (node *Node) sendAllBlocks(conn *Conn) error {
-	msg, err := node.newAllBlocksMessage()
-	if err != nil {
-		return err
-	}
-
-	return node.send(conn, msg)
 }
 
 func (node *Node) send(conn *Conn, msg *Message) error {
@@ -107,9 +78,7 @@ func (node *Node) handleBlocksResponse(conn *Conn, msg *Message) error {
 		if node.blockchain.getLatestBlock().Hash == latestBlock.PreviousHash {
 			if isValidBlock(latestBlock, node.blockchain.getLatestBlock()) {
 				node.blockchain.addBlock(latestBlock)
-				if err := node.broadcastLatestBlock(); err != nil {
-					return err
-				}
+				node.broadcast(node.newLatestBlockMessage())
 			}
 		} else if len(blocks) == 1 {
 			node.broadcast(newQueryAllMessage())
@@ -118,9 +87,7 @@ func (node *Node) handleBlocksResponse(conn *Conn, msg *Message) error {
 			bc.replaceBlocks(blocks)
 			if bc.isValid() {
 				node.blockchain.replaceBlocks(blocks)
-				if err := node.broadcastLatestBlock(); err != nil {
-					return err
-				}
+				node.broadcast(node.newLatestBlockMessage())
 			}
 		}
 	}
@@ -153,11 +120,11 @@ func (node *Node) p2pHandler(conn *Conn) {
 
 		switch msg.Type {
 		case MessageTypeQueryLatest:
-			if err := node.sendLatestBlock(conn); err != nil {
+			if err := node.send(conn, node.newLatestBlockMessage()); err != nil {
 				node.logError(err)
 			}
 		case MessageTypeQueryAll:
-			if err := node.sendAllBlocks(conn); err != nil {
+			if err := node.send(conn, node.newAllBlocksMessage()); err != nil {
 				node.logError(err)
 			}
 		case MessageTypeBlocks:

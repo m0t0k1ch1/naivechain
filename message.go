@@ -40,14 +40,11 @@ func newQueryAllMessage() *Message {
 	}
 }
 
-func newBlocksMessage(blocks Blocks) (*Message, error) {
-	b, err := json.Marshal(blocks)
-	if err != nil {
-		return nil, err
-	}
+func newBlocksMessage(blocks Blocks) *Message {
+	b, _ := json.Marshal(blocks)
 
 	return &Message{
 		Type: MessageTypeBlocks,
 		Data: string(b),
-	}, nil
+	}
 }

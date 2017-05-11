@@ -29,10 +29,7 @@ func (node *Node) mineBlockHandler(w http.ResponseWriter, r *http.Request) {
 
 	block := node.blockchain.generateBlock(params.Data)
 	node.blockchain.addBlock(block)
-
-	if err := node.broadcastLatestBlock(); err != nil {
-		node.logError(err)
-	}
+	node.broadcast(node.newLatestBlockMessage())
 
 	b, err := json.Marshal(map[string]string{
 		"hash": block.hash(),
