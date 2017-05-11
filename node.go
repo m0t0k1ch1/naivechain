@@ -66,6 +66,7 @@ func (node *Node) newP2PServer() *http.Server {
 func (node *Node) run() {
 	apiSrv := node.newApiServer()
 	go func() {
+		node.log("start HTTP server for API")
 		if err := apiSrv.ListenAndServe(); err != nil {
 			log.Fatal(err)
 		}
@@ -73,6 +74,7 @@ func (node *Node) run() {
 
 	p2pSrv := node.newP2PServer()
 	go func() {
+		node.log("start WebSocket server for P2P")
 		if err := p2pSrv.ListenAndServe(); err != nil {
 			log.Fatal(err)
 		}
@@ -83,6 +85,7 @@ func (node *Node) run() {
 	for {
 		s := <-signalCh
 		if s == syscall.SIGTERM {
+			node.log("stop servers")
 			apiSrv.Shutdown(context.Background())
 			p2pSrv.Shutdown(context.Background())
 		}

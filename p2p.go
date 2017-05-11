@@ -114,7 +114,7 @@ func (node *Node) p2pHandler(conn *Conn) {
 		}
 
 		node.log(fmt.Sprintf(
-			"receive %s message from %s",
+			"received %s message from %s",
 			msg.Type.name(), conn.remoteHost(),
 		))
 
