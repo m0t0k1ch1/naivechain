@@ -1,6 +1,9 @@
 package main
 
-import "testing"
+import (
+	"sort"
+	"testing"
+)
 
 var testGenesisBlock = &Block{
 	Index:        0,
@@ -8,6 +11,30 @@ var testGenesisBlock = &Block{
 	Timestamp:    1465154705,
 	Data:         "my genesis block!!",
 	Hash:         "816534932c2b7154836da6afc367695e6337db8a921823784c14378abed4f7d7",
+}
+
+func TestSortBlocks(t *testing.T) {
+	blocks := Blocks{
+		&Block{
+			Index: 2,
+		},
+		&Block{
+			Index: 3,
+		},
+		&Block{
+			Index: 1,
+		},
+	}
+
+	sort.Sort(blocks)
+
+	var i int64 = 1
+	for _, block := range blocks {
+		if block.Index != i {
+			t.Errorf("want %d but %d", i, block.Index)
+		}
+		i++
+	}
 }
 
 func TestBlockHash(t *testing.T) {
