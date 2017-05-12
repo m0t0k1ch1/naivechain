@@ -36,11 +36,11 @@ func (node *Node) disconnectPeer(conn *Conn) {
 	node.deleteConn(conn.id)
 }
 
-func (node *Node) newLatestBlockMessage() *Message {
+func (node *Node) newLatestBlockMessage() (*Message, error) {
 	return newBlocksMessage(Blocks{node.blockchain.getLatestBlock()})
 }
 
-func (node *Node) newAllBlocksMessage() *Message {
+func (node *Node) newAllBlocksMessage() (*Message, error) {
 	return newBlocksMessage(node.blockchain.blocks)
 }
 
@@ -78,7 +78,13 @@ func (node *Node) handleBlocksResponse(conn *Conn, msg *Message) error {
 		if node.blockchain.getLatestBlock().Hash == latestBlock.PreviousHash {
 			if isValidBlock(latestBlock, node.blockchain.getLatestBlock()) {
 				node.blockchain.addBlock(latestBlock)
-				node.broadcast(node.newLatestBlockMessage())
+
+				msg, err := node.newLatestBlockMessage()
+				if err != nil {
+					return err
+				}
+
+				node.broadcast(msg)
 			}
 		} else if len(blocks) == 1 {
 			node.broadcast(newQueryAllMessage())
@@ -87,7 +93,13 @@ func (node *Node) handleBlocksResponse(conn *Conn, msg *Message) error {
 			bc.replaceBlocks(blocks)
 			if bc.isValid() {
 				node.blockchain.replaceBlocks(blocks)
-				node.broadcast(node.newLatestBlockMessage())
+
+				msg, err := node.newLatestBlockMessage()
+				if err != nil {
+					return err
+				}
+
+				node.broadcast(msg)
 			}
 		}
 	}
@@ -120,11 +132,21 @@ func (node *Node) p2pHandler(conn *Conn) {
 
 		switch msg.Type {
 		case MessageTypeQueryLatest:
-			if err := node.send(conn, node.newLatestBlockMessage()); err != nil {
+			msg, err := node.newLatestBlockMessage()
+			if err != nil {
+				node.logError(err)
+				continue
+			}
+			if err := node.send(conn, msg); err != nil {
 				node.logError(err)
 			}
 		case MessageTypeQueryAll:
-			if err := node.send(conn, node.newAllBlocksMessage()); err != nil {
+			msg, err := node.newAllBlocksMessage()
+			if err != nil {
+				node.logError(err)
+				continue
+			}
+			if err := node.send(conn, msg); err != nil {
 				node.logError(err)
 			}
 		case MessageTypeBlocks:

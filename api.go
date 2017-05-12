@@ -30,7 +30,12 @@ func (node *Node) mineBlockHandler(w http.ResponseWriter, r *http.Request) {
 	block := node.blockchain.generateBlock(params.Data)
 	node.blockchain.addBlock(block)
 	node.log("mined block:", block.Hash)
-	node.broadcast(node.newLatestBlockMessage())
+
+	msg, err := node.newLatestBlockMessage()
+	if err != nil {
+		node.error(w, err, "failed to build message")
+	}
+	node.broadcast(msg)
 
 	b, err := json.Marshal(map[string]string{
 		"hash": block.hash(),
