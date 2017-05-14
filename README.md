@@ -13,7 +13,7 @@ $ go get -u github.com/m0t0k1ch1/naivechain
 ## Run
 
 ``` sh
-$ naivechain [-api API_SERVER_ADDRESS] [-p2p P2P_SERVER_ADDRESS] [-origin P2P_ORIGIN]
+$ naivechain [-api HTTP_SERVER_ADDRESS_FOR_API] [-p2p WEBSOCKET_SERVER_ADDRESS_FOR_P2P] [-origin P2P_ORIGIN]
 ```
 
 ### Example

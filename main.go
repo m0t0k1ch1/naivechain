@@ -6,9 +6,9 @@ import (
 )
 
 var (
-	apiAddr   = flag.String("api", ":3001", "api server address")
-	p2pAddr   = flag.String("p2p", ":6001", "p2p server address")
-	p2pOrigin = flag.String("origin", "http://127.0.0.1", "p2p origin")
+	apiAddr   = flag.String("api", ":3001", "HTTP server address for API")
+	p2pAddr   = flag.String("p2p", ":6001", "WebSocket server address for P2P")
+	p2pOrigin = flag.String("origin", "http://127.0.0.1", "P2P origin")
 
 	ErrInvalidChain       = errors.New("invalid chain")
 	ErrInvalidBlock       = errors.New("invalid block")
