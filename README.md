@@ -24,7 +24,7 @@ $ naivechain -api :3001 -p2p :6001
 
 ## HTTP API
 
-### Get Blockchain
+### Get chain
 
 ``` sh
 $ curl http://127.0.0.1:3001/blocks
