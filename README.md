@@ -33,7 +33,7 @@ $ curl http://127.0.0.1:3001/blocks
 ### Mine block
 
 ``` sh
-$ curl http://127.0.0.1:3001/mineBlock -d '{"data":"your data"}'
+$ curl http://127.0.0.1:3001/mineBlock -d '{"data":"some data to include in the block"}'
 ```
 
 ### Add peer
