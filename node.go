@@ -31,7 +31,7 @@ func newNode() *Node {
 		conns:      []*Conn{},
 		mu:         sync.RWMutex{},
 		logger: log.New(
-			os.Stdout,
+			os.Stderr,
 			"node: ",
 			log.Ldate|log.Ltime,
 		),
@@ -93,7 +93,7 @@ func (node *Node) run() {
 }
 
 func (node *Node) log(v ...interface{}) {
-	node.logger.Println(v)
+	node.logger.Println(v...)
 }
 
 func (node *Node) logError(err error) {
