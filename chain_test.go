@@ -68,65 +68,63 @@ func TestReplaceBlocks(t *testing.T) {
 	}
 }
 
-type isValidChainTestCase struct {
-	name       string
-	blockchain *Blockchain
-	ok         bool
-}
-
-var isValidChainTestCases = []isValidChainTestCase{
-	isValidChainTestCase{
-		"empty",
-		newTestBlockchain(Blocks{}),
-		false,
-	},
-	isValidChainTestCase{
-		"invalid genesis block",
-		newTestBlockchain(Blocks{
-			&Block{
-				Index:        0,
-				PreviousHash: "0",
-				Timestamp:    1465154705,
-				Data:         "bad genesis block!!",
-				Hash:         "627ab16dbcede0cfa91c85a88c30c4eaae41b8500a961d0d09451323c6e25bf8",
-			},
-		}),
-		false,
-	},
-	isValidChainTestCase{
-		"invalid block",
-		newTestBlockchain(Blocks{
-			testGenesisBlock,
-			&Block{
-				Index:        2,
-				PreviousHash: testGenesisBlock.Hash,
-				Timestamp:    1494177351,
-				Data:         "white noise",
-				Hash:         "6e27d73b81b2abf47e6766b8aad12a114614fccac669d0d2162cb842f0484420",
-			},
-		}),
-		false,
-	},
-	isValidChainTestCase{
-		"valid",
-		newTestBlockchain(Blocks{
-			testGenesisBlock,
-			&Block{
-				Index:        1,
-				PreviousHash: testGenesisBlock.Hash,
-				Timestamp:    1494177351,
-				Data:         "white noise",
-				Hash:         "1cee23ac6ce3589aedbd92213e0dbf8ab41f8f8e6181a92c1a8243df4b32078b",
-			},
-		}),
-		true,
-	},
-}
-
 func TestIsValidChain(t *testing.T) {
-	for _, testCase := range isValidChainTestCases {
-		if ok := testCase.blockchain.isValid(); ok != testCase.ok {
-			t.Errorf("[%s] want %t but %t", testCase.name, testCase.ok, ok)
+	testCases := []struct {
+		name       string
+		blockchain *Blockchain
+		ok         bool
+	}{
+		{
+			"empty",
+			newTestBlockchain(Blocks{}),
+			false,
+		},
+		{
+			"invalid genesis block",
+			newTestBlockchain(Blocks{
+				&Block{
+					Index:        0,
+					PreviousHash: "0",
+					Timestamp:    1465154705,
+					Data:         "bad genesis block!!",
+					Hash:         "627ab16dbcede0cfa91c85a88c30c4eaae41b8500a961d0d09451323c6e25bf8",
+				},
+			}),
+			false,
+		},
+		{
+			"invalid block",
+			newTestBlockchain(Blocks{
+				testGenesisBlock,
+				&Block{
+					Index:        2,
+					PreviousHash: testGenesisBlock.Hash,
+					Timestamp:    1494177351,
+					Data:         "white noise",
+					Hash:         "6e27d73b81b2abf47e6766b8aad12a114614fccac669d0d2162cb842f0484420",
+				},
+			}),
+			false,
+		},
+		{
+			"valid",
+			newTestBlockchain(Blocks{
+				testGenesisBlock,
+				&Block{
+					Index:        1,
+					PreviousHash: testGenesisBlock.Hash,
+					Timestamp:    1494177351,
+					Data:         "white noise",
+					Hash:         "1cee23ac6ce3589aedbd92213e0dbf8ab41f8f8e6181a92c1a8243df4b32078b",
+				},
+			}),
+			true,
+		},
+	}
+
+	for _, tc := range testCases {
+		if ok := tc.blockchain.isValid(); ok != tc.ok {
+			t.Errorf("[%s] want %t but %t", tc.name, tc.ok, ok)
 		}
 	}
 }
